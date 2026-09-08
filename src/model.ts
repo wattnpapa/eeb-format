@@ -390,3 +390,57 @@ export function ansprechpartner(personal: Person[]): Person | undefined {
     personal.find((p) => p.kontakte.length > 0)
   );
 }
+
+/**
+ * Hebt einen aus JSON gelesenen Bogen auf die aktuelle Schemaversion.
+ *
+ * Der Codec migriert beim Dekodieren selbst — dieser Weg hier ist der andere:
+ * eine Bogendatei oder ein aus einer PDF gezogener JSON-Anhang. Beide Wege
+ * müssen dasselbe Ergebnis liefern, sonst hängt das Verhalten davon ab, über
+ * welchen Kanal ein Bogen hereinkam.
+ *
+ * Verändert das übergebene Objekt an Ort und Stelle und gibt es zurück.
+ * Aufnahmeregel 4 aus ADR-003: Bögen ab Schema 2 bleiben lesbar, jeder Schritt
+ * bleibt stehen.
+ */
+export function migriereBogen(b: Erfassungsbogen): Erfassungsbogen {
+  if (b.schemaVersion < 3) {
+    for (const p of b.personal) {
+      if (p.ernaehrung == null) p.ernaehrung = Ernaehrung.FLEISCH;
+    }
+    // Bis Schema 2 stand die Zahl der Vegetarier im Sofortbedarf. Das Feld
+    // gibt es im Typ nicht mehr; die weitere Deklaration holt es zurück, ohne
+    // eine Typbehauptung aufzustellen.
+    const sb: (Sofortbedarf & { davonVegetarisch?: number }) | undefined = b.sofortbedarf;
+    if (sb) {
+      if (sb.davonVegetarisch && sb.davonVegetarisch > 0 && !b.verpflegungManuell) {
+        b.verpflegungManuell = { vegetarisch: sb.davonVegetarisch, vegan: 0 };
+      }
+      delete sb.davonVegetarisch;
+    }
+  }
+  if (b.schemaVersion < 4) {
+    // Getrennte Kennzeichenfelder zusammengeführt: THW-Nummer wird zum String.
+    for (const f of b.fahrzeuge as (Fahrzeug & { thwKennzeichen?: number; kennzeichenFreitext?: string })[]) {
+      if (f.kennzeichen == null) {
+        f.kennzeichen =
+          f.thwKennzeichen != null ? `THW-${String(f.thwKennzeichen).padStart(5, "0")}` : f.kennzeichenFreitext;
+      }
+      delete f.thwKennzeichen;
+      delete f.kennzeichenFreitext;
+    }
+  }
+  if (b.schemaVersion < 5) {
+    // Bis Schema 4 war „Name der Einheit" ein eigenes Freitextfeld neben einer
+    // optionalen Hierarchie — faktisch eine Doppeleingabe zur untersten Ebene.
+    const e = b.einheit as Einheit & { name?: string };
+    if (e.name && e.hierarchie.length === 0) e.hierarchie.push({ bezeichnung: {}, name: e.name });
+    delete e.name;
+  }
+  if (b.schemaVersion < 7) {
+    // Stand war ein Kalendertag; ab Schema 7 minutengenau → Mitternacht annehmen.
+    b.stand *= MINUTEN_JE_TAG;
+  }
+  b.schemaVersion = SCHEMA_VERSION;
+  return b;
+}

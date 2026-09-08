@@ -12,6 +12,7 @@ import {
   ansprechpartner,
   datumAusIso,
   datumZuIso,
+  migriereBogen,
   mitTransportVersion,
   staerke,
   transportSchemaVersion,
@@ -239,5 +240,66 @@ describe("Konstanten", () => {
     expect(mitTransportVersion(b)).toMatchObject({ schemaVersion: 5, stand: 1000 });
     const mitZeit = { ...b, stand: 1000 * MINUTEN_JE_TAG + 639 };
     expect(mitTransportVersion(mitZeit)).toMatchObject({ schemaVersion: 7, stand: 1000 * MINUTEN_JE_TAG + 639 });
+  });
+});
+
+describe("migriereBogen() — der JSON-Weg, der zum Codec passen muss", () => {
+  // Der Codec migriert beim Dekodieren selbst; dies hier ist der andere Weg
+  // (Bogendatei, JSON-Anhang einer PDF). Weichen beide voneinander ab, hinge
+  // das Verhalten davon ab, über welchen Kanal ein Bogen hereinkam.
+  function alterBogen(schemaVersion: number, rest: Record<string, unknown> = {}): Erfassungsbogen {
+    return {
+      schemaVersion,
+      stand: 0,
+      einheit: { organisation: 1, einheitsTyp: {}, hierarchie: [] },
+      einsatz: { zeitraumVon: 0, zeitraumBis: 0, ortAuftrag: "" },
+      personalErfassung: PersonalErfassung.VOLLSTAENDIG,
+      personal: [],
+      fahrzeuge: [],
+      ...rest,
+    };
+  }
+
+  it("setzt fehlende Ernährung auf Fleisch (Schema < 3)", () => {
+    const alt = alterBogen(2, { personal: [{ ...person(), ernaehrung: undefined }] });
+    expect(migriereBogen(alt).personal[0]?.ernaehrung).toBe(Ernaehrung.FLEISCH);
+  });
+
+  it("macht aus davonVegetarisch die manuelle Verpflegungsangabe (Schema < 3)", () => {
+    const alt = alterBogen(2, {
+      sofortbedarf: { davonVegetarisch: 4 },
+    });
+    const b = migriereBogen(alt);
+    expect(b.verpflegungManuell).toEqual({ vegetarisch: 4, vegan: 0 });
+    expect(b.sofortbedarf).not.toHaveProperty("davonVegetarisch");
+  });
+
+  it("führt die getrennten Kennzeichenfelder zusammen (Schema < 4)", () => {
+    const alt = alterBogen(3, {
+      fahrzeuge: [{ typ: {}, thwKennzeichen: 42 }, { typ: {}, kennzeichenFreitext: "OL-AB 12" }],
+    });
+    const b = migriereBogen(alt);
+    expect(b.fahrzeuge[0]?.kennzeichen).toBe("THW-00042");
+    expect(b.fahrzeuge[1]?.kennzeichen).toBe("OL-AB 12");
+    expect(b.fahrzeuge[0]).not.toHaveProperty("thwKennzeichen");
+  });
+
+  it("macht aus dem freien Einheitsnamen die unterste Hierarchie-Ebene (Schema < 5)", () => {
+    const alt = alterBogen(4, {
+      einheit: { organisation: 1, einheitsTyp: {}, hierarchie: [], name: "Oldenburg" },
+    });
+    const b = migriereBogen(alt);
+    expect(b.einheit.hierarchie[0]?.name).toBe("Oldenburg");
+    expect(b.einheit).not.toHaveProperty("name");
+  });
+
+  it("rechnet den Kalendertag auf Minuten hoch (Schema < 7)", () => {
+    expect(migriereBogen(alterBogen(6, { stand: 1000 })).stand).toBe(1000 * MINUTEN_JE_TAG);
+  });
+
+  it("lässt einen aktuellen Bogen unverändert und setzt die Schemaversion", () => {
+    const b = migriereBogen(alterBogen(SCHEMA_VERSION, { stand: 5 }));
+    expect(b.stand).toBe(5);
+    expect(b.schemaVersion).toBe(SCHEMA_VERSION);
   });
 });
