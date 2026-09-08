@@ -20,6 +20,10 @@
     "./node": {
       "types": "./dist/qr-node.d.ts",
       "default": "./dist/qr-node.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
   "types": "./dist/index.d.ts",
