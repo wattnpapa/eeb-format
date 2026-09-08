@@ -1,5 +1,5 @@
 /**
- * `@bos/kern` — geteilter, plattformneutraler Kern.
+ * `@bos/eeb-format` — geteilter, plattformneutraler Kern.
  *
  * Dieses Modul ist zunächst absichtlich fast leer: Es ist der
  * Verdrahtungsnachweis für die Einbindung als Submodul in

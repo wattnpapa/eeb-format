@@ -1,14 +1,14 @@
-# @bos/kern
+# @bos/eeb-format
 
 Geteilter, plattformneutraler TypeScript-Kern für BOS-Anwendungen.
 
 Dieses Repository ist **kein eigenständiges Produkt**, sondern hängt als
-git-Submodul unter `vendor/bos-kern` in zwei Produkten:
+git-Submodul unter `vendor/eeb-format` in zwei Produkten:
 
 - **einheitenerfassungsbogen** — PWA mit Capacitor und Electron, gebaut mit Vite
 - **S1-Control v2** — Electron-Anwendung mit npm-Workspaces
 
-Beide binden das Paket über `"@bos/kern": "file:vendor/bos-kern"` ein.
+Beide binden das Paket über `"@bos/eeb-format": "file:vendor/eeb-format"` ein.
 
 Der derzeitige Inhalt ist **absichtlich fast leer**: `kernVersion()` und
 `inhaltsHash()` sind der Verdrahtungsnachweis, mit dem Einbindung, Bau, Typen,
@@ -100,10 +100,10 @@ Beide Wege wurden mit `tsc -b` und mit einem Node-Skript gegen eine
 **Zu beachten beim Konsumenten:** Neuere npm-Versionen führen Install-Skripte
 von Abhängigkeiten nicht mehr ungefragt aus. Bleibt `dist/` nach dem
 `npm install` leer, ist das `prepare`-Skript blockiert worden; dann entweder
-`npm install-scripts approve @bos/kern` oder schlicht
+`npm install-scripts approve @bos/eeb-format` oder schlicht
 
 ```bash
-npm --prefix vendor/bos-kern install && npm --prefix vendor/bos-kern run build
+npm --prefix vendor/eeb-format install && npm --prefix vendor/eeb-format run build
 ```
 
 ## Lizenz

@@ -1,7 +1,7 @@
 {
-  "name": "@bos/kern",
+  "name": "@bos/eeb-format",
   "version": "0.0.0",
-  "description": "Geteilter, plattformneutraler Kern für BOS-Anwendungen (Erfassungsbogen und S1-Control).",
+  "description": "Austauschformat des Einheiten-Erfassungsbogens: Bogenmodell, Codec, Signaturkette und QR.",
   "license": "EUPL-1.2",
   "author": {
     "name": "Johannes Rudolph",
@@ -35,5 +35,9 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wattnpapa/eeb-format.git"
   }
 }

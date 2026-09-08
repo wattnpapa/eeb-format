@@ -5,7 +5,7 @@ import { inhaltsHash, kernVersion } from "./index.js";
 // Diese Datei läuft in beiden Vitest-Projekten: einmal unter „node", einmal
 // unter „jsdom". Dass beide Läufe dieselben Werte liefern, ist der Beleg für
 // die Plattformneutralität des Kerns.
-describe("@bos/kern", () => {
+describe("@bos/eeb-format", () => {
   it("meldet die Kernversion", () => {
     expect(kernVersion()).toBe("0.0.0");
   });
