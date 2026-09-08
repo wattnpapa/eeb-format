@@ -1,0 +1,35 @@
+# Prüflauf des geteilten Kerns. Die vier Schritte sind genau die, mit denen
+# ADR-003 seine Aufnahmeregeln maschinell hinterlegt:
+#
+#   lint       — keine node:-, DOM-, React- oder Rückimporte (Regel 2 und 3)
+#   typecheck  — zwei Programme: das plattformneutrale ohne DOM- und
+#                Node-Typen, und getrennt davon die Node-Implementierung
+#   test       — dieselben Testdateien unter node UND jsdom (Regel 2)
+#   build      — belegt, dass dist/ samt Typdeklarationen entsteht; ohne das
+#                bekommt ein Konsument beim npm install ein leeres Paket
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

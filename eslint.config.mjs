@@ -82,6 +82,32 @@ export default tseslint.config(
     },
   },
   {
+    // Die Node-Implementierung des Formats. Aufnahmeregel 2 gilt in einem
+    // Format-Repo je Sprachimplementierung, nicht über das Repo hinweg
+    // (ADR-003, Nachtrag): hier sind node:zlib, qrcode und Buffer erlaubt.
+    // Alles andere bleibt verboten — insbesondere DOM, React und Rückimporte.
+    files: ["src/qr-node.ts"],
+    languageOptions: {
+      parserOptions: {
+        // Diese Datei steht bewusst nicht in tsconfig.json, sondern in
+        // tsconfig.node.json; ohne diesen Verweis findet der Dienst sie nicht.
+        projectService: false,
+        project: ["./tsconfig.node.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "no-restricted-imports": "off",
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [...BROWSER_PAKETE.filter((p) => p.name !== "qrcode")],
+          patterns: VERBOTENE_MUSTER.filter((m) => !m.group.includes("node:*")),
+        },
+      ],
+    },
+  },
+  {
     // Konfigurationsdateien liegen außerhalb des ausgelieferten Kerns und
     // dürfen daher Werkzeugpakete einbinden.
     files: ["*.mjs", "*.ts", "vitest.config.ts"],

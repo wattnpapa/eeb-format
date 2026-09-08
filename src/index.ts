@@ -1,14 +1,26 @@
 /**
- * `@bos/eeb-format` — geteilter, plattformneutraler Kern.
+ * `@bos/eeb-format` — das Austauschformat des Einheiten-Erfassungsbogens.
  *
- * Dieses Modul ist zunächst absichtlich fast leer: Es ist der
- * Verdrahtungsnachweis für die Einbindung als Submodul in
- * `einheitenerfassungsbogen` und `S1-Control`. Die eigentliche Extraktion
- * fachlicher Bausteine folgt später.
+ * Drei Bausteine, aufeinander aufbauend:
+ *  - `model`    — der Bogen selbst: Typen, Zählregeln, Schema-Migration.
+ *                 Importiert nichts.
+ *  - `codec`    — Bogen ⇄ Bytes ⇄ QR-URL: Base41, Segmentierung, Kompression
+ *                 (die Kompression wird hineingereicht, siehe `Kompressor`).
+ *  - `signatur` — die Ed25519-Kette über einem kodierten Bogen.
+ *
+ * Die Node-Implementierung (`qr-node`) hängt nicht hier drin, sondern am
+ * Einstieg `@bos/eeb-format/node`. Sie darf `node:zlib`, `qrcode` und `Buffer`
+ * benutzen; alles in dieser Datei darf das nicht — Aufnahmeregel 2 aus ADR-003
+ * gilt in einem Format-Repo je Sprachimplementierung, nicht über das Repo
+ * hinweg.
  *
  * Alles hier drin muss ohne `node:`-, DOM- oder Framework-Zugriffe auskommen
  * und in Node wie im Browser bitgleiche Ergebnisse liefern.
  */
+
+export * from "./model.js";
+export * from "./codec.js";
+export * from "./signatur.js";
 
 /** Version des Kerns, gepflegt im Gleichklang mit `package.json`. */
 const VERSION = "0.0.0";

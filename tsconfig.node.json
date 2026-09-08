@@ -1,0 +1,11 @@
+{
+  // Typprüfung der Node-Implementierung des Formats. Sie darf, was der
+  // plattformneutrale Teil nicht darf: node:zlib, qrcode, Buffer. Getrennter
+  // Lauf, damit die Ausnahme sichtbar bleibt und nicht auf den Rest abfärbt.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/qr-node.ts"],
+  "exclude": ["src/plattform.d.ts"]
+}

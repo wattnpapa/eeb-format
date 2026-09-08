@@ -10,10 +10,43 @@ git-Submodul unter `vendor/eeb-format` in zwei Produkten:
 
 Beide binden das Paket über `"@bos/eeb-format": "file:vendor/eeb-format"` ein.
 
-Der derzeitige Inhalt ist **absichtlich fast leer**: `kernVersion()` und
-`inhaltsHash()` sind der Verdrahtungsnachweis, mit dem Einbindung, Bau, Typen,
-Lint und Testlauf in beiden Produkten belegt werden. Die eigentliche Extraktion
-fachlicher Bausteine folgt in einem späteren Arbeitspaket.
+## Inhalt
+
+| Modul | Was | Hängt ab von |
+|---|---|---|
+| `model` | der Bogen selbst: Typen, Zählregeln, Schema-Migration bis Version 8 | — |
+| `codec` | Bogen ⇄ Bytes ⇄ QR-URL: Base41, Segmentierung, Kompression | `model` |
+| `signatur` | Ed25519-Kette über einem kodierten Bogen, Absenderkarte | `model`, `codec` |
+| `qr-node` | QR als SVG/PNG und Kompression für Node/Electron | alle drei |
+
+`kernVersion()` und `inhaltsHash()` bleiben zusätzlich erhalten: sie sind der
+Verdrahtungsnachweis, mit dem sich in einem Konsumenten ohne fachliche Daten
+zeigen lässt, dass der Submodul-Stand tatsächlich geladen wurde.
+
+### Zwei Einstiege
+
+```js
+import { SCHEMA_VERSION, encodePayloadUrl } from "@bos/eeb-format";       // plattformneutral
+import { bogenZuQrSvg, nodeKompressor } from "@bos/eeb-format/node";      // nur Node/Electron
+```
+
+Der zweite Einstieg ist die **Node-Implementierung des Formats**. Sie darf
+`node:zlib`, `qrcode` und `Buffer` benutzen — Aufnahmeregel 2 gilt in einem
+Format-Repo je Sprachimplementierung, nicht über das Repo hinweg (ADR-003,
+Nachtrag „Warum qr-node.ts jetzt passt"). Damit die Ausnahme nicht abfärbt,
+ist sie an drei Stellen eingegrenzt:
+
+- `tsconfig.json` schließt `src/qr-node.ts` aus; der Lauf belegt dadurch
+  weiterhin, dass Modell, Codec und Signatur **weder DOM- noch Node-Typen**
+  brauchen. Geprüft wird die Datei getrennt in `tsconfig.node.json`.
+- `eslint.config.mjs` erlaubt genau dort `node:*` und `qrcode`, sonst nirgends.
+- `src/index.ts` re-exportiert sie **nicht**. Wer sie will, muss den zweiten
+  Einstieg nennen und weiß damit, dass er sich an Node bindet.
+
+Die Kompression selbst steckt nicht im Codec, sondern wird als `Kompressor`
+hineingereicht — im Browser pako, unter Node `node:zlib`. Deshalb kommt der
+Codec ohne beides aus, und deshalb benutzen auch die Tests pako statt
+`node:zlib`: nur so läuft derselbe Test unter `node` und unter `jsdom`.
 
 ## Aufnahmeregeln (ADR-003)
 

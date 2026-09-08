@@ -16,6 +16,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/qr-node.d.ts",
+      "default": "./dist/qr-node.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -23,15 +27,20 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "test": "vitest run --reporter=verbose",
     "lint": "eslint ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
+    "@types/pako": "^2.0.4",
+    "@types/qrcode": "^1.5.6",
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.10.0",
     "jsdom": "^29.1.1",
+    "pako": "^3.0.1",
+    "qrcode": "^1.5.4",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.1.10"
@@ -39,5 +48,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wattnpapa/eeb-format.git"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.3.0"
   }
 }

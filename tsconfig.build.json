@@ -3,6 +3,11 @@
   // Tests und Werkzeugdateien bleiben außen vor.
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // Gebaut wird alles, auch die Node-Implementierung; die Typen dafür liefert
+    // @types/node. Die handgeschriebenen Ersatzdeklarationen aus
+    // src/plattform.d.ts bleiben hier draußen — zweimal derselbe Name wäre ein
+    // Fehler.
+    "types": ["node"],
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
@@ -11,5 +16,5 @@
     "rootDir": "src"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts", "src/plattform.d.ts"]
 }

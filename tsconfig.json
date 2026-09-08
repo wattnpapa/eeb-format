@@ -16,5 +16,12 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "vitest.config.ts"],
+  // `qr-node.ts` ist die Node-Implementierung des Formats und darf `node:zlib`,
+  // `qrcode` und `Buffer` benutzen — Aufnahmeregel 2 gilt in einem
+  // Format-Repo je Sprachimplementierung, nicht über das Repo hinweg
+  // (ADR-003, Nachtrag). Sie wird deshalb in `tsconfig.node.json` geprüft,
+  // damit dieser Lauf hier weiterhin belegt: Modell, Codec und Signatur
+  // brauchen weder DOM- noch Node-Typen.
+  "exclude": ["src/qr-node.ts"]
 }
