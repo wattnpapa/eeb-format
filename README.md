@@ -86,7 +86,7 @@ Voraussetzung: Node 24 (siehe `.nvmrc`). Die `.npmrc` zeigt bewusst auf die
 ist.
 
 ```bash
-npm install      # installiert und baut über das prepare-Skript nach dist/
+npm install
 npm run build    # dist/index.js plus dist/index.d.ts
 npm run typecheck
 npm run lint
@@ -106,7 +106,7 @@ unterstützt, fällt der zweite Eintrag ersatzlos weg.
 ## Wie das Paket konsumiert wird — und warum
 
 Gewählt ist **Weg (b): `exports` zeigt auf das gebaute `dist/`**, gebaut per
-`tsc`, ausgelöst über das `prepare`-Skript beim `npm install` des Konsumenten.
+`tsc` über `npm run build`.
 
 Die Alternative — `exports` direkt auf `./src/index.ts` — wurde ausprobiert und
 verworfen. Sie sieht zunächst bequem aus und funktioniert sogar, solange der
@@ -123,21 +123,37 @@ Error [ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING]
 Node strippt Typen grundsätzlich nicht für Abhängigkeiten unterhalb von
 `node_modules`. Damit wäre der Kern von einer Eigenschaft der Installationsform
 abhängig — genau die Sorte Fehler, die erst im Release auffällt. Weg (b) liefert
-stattdessen gewöhnliches ESM plus Deklarationsdateien: Vite und esbuild können
-vorbündeln, `tsc -b` in den Workspaces von S1-Control liest `dist/index.d.ts`
-wie bei jedem anderen Paket, und Electron lädt zur Laufzeit reines JavaScript.
+stattdessen gewöhnliches ESM plus Deklarationsdateien: `tsc -b` in den
+Workspaces von S1-Control liest `dist/index.d.ts` wie bei jedem anderen Paket,
+und Electron lädt zur Laufzeit reines JavaScript.
 
-Beide Wege wurden mit `tsc -b` und mit einem Node-Skript gegen eine
-`file:`-Installation geprüft; nur Weg (b) hält in allen Fällen.
+### Warum es KEIN `prepare`-Skript gibt
 
-**Zu beachten beim Konsumenten:** Neuere npm-Versionen führen Install-Skripte
-von Abhängigkeiten nicht mehr ungefragt aus. Bleibt `dist/` nach dem
-`npm install` leer, ist das `prepare`-Skript blockiert worden; dann entweder
-`npm install-scripts approve @bos/eeb-format` oder schlicht
+Naheliegend wäre, `dist/` beim `npm install` des Konsumenten selbst zu bauen —
+dafür ist `prepare` gedacht. Das trägt hier nicht, aus zwei unabhängigen
+Gründen:
+
+1. **Die Reihenfolge stimmt nicht.** `@bos/meldekopf` und `@bos/vokabulare`
+   brauchen zum Bauen die Typdeklarationen aus `@bos/eeb-format/dist`. npm
+   ordnet die `prepare`-Läufe von `file:`-Abhängigkeiten aber nicht nach der
+   Peer-Beziehung. In der CI von erfassungsbogen.app lief der Meldekopf zuerst
+   und scheiterte mit `TS2307: Cannot find module '@bos/eeb-format'` — 34
+   Folgefehler, deren Ursache nirgends dasteht.
+2. **npm führt Install-Skripte von Abhängigkeiten ohnehin nicht mehr ungefragt
+   aus** (`npm install-scripts approve`). Ein Mechanismus, der je nach
+   npm-Einstellung läuft oder nicht, taugt nicht als Baustein.
+
+Wer `dist/` braucht, baut deshalb ausdrücklich — **in dieser Reihenfolge**:
 
 ```bash
 npm --prefix vendor/eeb-format install && npm --prefix vendor/eeb-format run build
+npm --prefix vendor/bos-vokabulare install && npm --prefix vendor/bos-vokabulare run build
+npm --prefix vendor/bos-taktische-zeichen install && npm --prefix vendor/bos-taktische-zeichen run build
+npm --prefix vendor/bos-meldekopf install && npm --prefix vendor/bos-meldekopf run build
 ```
+
+erfassungsbogen.app braucht das nicht: es bildet `@bos/*` per Alias auf
+`vendor/*/src/*.ts` ab und bündelt die Quelle.
 
 ## Lizenz
 
