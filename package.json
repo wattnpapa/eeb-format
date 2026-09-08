@@ -1,0 +1,39 @@
+{
+  "name": "@bos/kern",
+  "version": "0.0.0",
+  "description": "Geteilter, plattformneutraler Kern für BOS-Anwendungen (Erfassungsbogen und S1-Control).",
+  "license": "EUPL-1.2",
+  "author": {
+    "name": "Johannes Rudolph",
+    "email": "johannes.rudolph@thw-oldenburg.de"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --reporter=verbose",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^10.10.0",
+    "jsdom": "^29.1.1",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^4.1.10"
+  }
+}
