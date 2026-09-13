@@ -21,6 +21,8 @@
 export * from "./model.js";
 export * from "./codec.js";
 export * from "./signatur.js";
+// Datenschutzfrist: baut allein auf `model` auf (Frist aus Stand/Übung, Anonymisierung).
+export * from "./datenschutzfrist.js";
 
 /** Version des Kerns, gepflegt im Gleichklang mit `package.json`. */
 const VERSION = "0.0.0";
