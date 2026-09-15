@@ -235,6 +235,17 @@ describe("Vokabular-Werte", () => {
     expect(zurueck.fahrzeuge[0]!.typ).toEqual({ code: 2 });
   });
 
+  it("hält eine abweichende Sitzplatzzahl je Fahrzeug", () => {
+    const b = basisBogen();
+    b.fahrzeuge[0]!.sitzplaetze = 7;
+    b.fahrzeuge[1]!.sitzplaetze = 0;
+    const zurueck = decodeBinaer(encodeBinaer(b));
+    expect(zurueck.fahrzeuge[0]!.sitzplaetze).toBe(7);
+    expect(zurueck.fahrzeuge[1]!.sitzplaetze).toBe(0);
+    // Ohne das Feld bleibt es undefined — nicht 0, das wäre „keine Plätze".
+    expect(decodeBinaer(encodeBinaer(basisBogen())).fahrzeuge[0]!.sitzplaetze).toBeUndefined();
+  });
+
   it("verbietet den reservierten Code 0", () => {
     const b = basisBogen();
     b.einheit.einheitsTyp = { code: 0 };

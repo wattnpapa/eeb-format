@@ -199,13 +199,22 @@ function encodeFunkrufname(w: Writer, fr: Funkrufname): void {
 }
 
 function encodeFahrzeug(w: Writer, f: Fahrzeug): void {
+  // Flag 16 ist verbrannt (bis Schema 3 das THW-Kennzeichen als Varint),
+  // deshalb sitzt die abweichende Sitzplatzzahl auf Flag 32.
   const flags =
-    (f.stanKonform != null ? 1 : 0) | (f.stanKonform ? 2 : 0) | (f.funkrufname ? 4 : 0) | (f.aenderungen ? 8 : 0);
+    (f.stanKonform != null ? 1 : 0) |
+    (f.stanKonform ? 2 : 0) |
+    (f.funkrufname ? 4 : 0) |
+    (f.aenderungen ? 8 : 0) |
+    (f.sitzplaetze != null ? 32 : 0);
   w.u8(flags);
   w.vokab(f.typ);
   w.str(f.kennzeichen ?? "");
   if (f.funkrufname) encodeFunkrufname(w, f.funkrufname);
   if (f.aenderungen) w.str(f.aenderungen);
+  // Ein Byte reicht: mehr als 255 Sitzplätze hat kein Fahrzeug, und die
+  // Eingabe der App begrenzt ohnehin auf zweistellige Zahlen.
+  if (f.sitzplaetze != null) w.u8(f.sitzplaetze);
 }
 
 function encodeEinheit(w: Writer, e: Einheit): void {
@@ -362,6 +371,7 @@ function decodeFahrzeug(r: Reader): Fahrzeug {
   if (flags & 4) f.funkrufname = decodeFunkrufname(r);
   if (flags & 1) f.stanKonform = (flags & 2) !== 0;
   if (flags & 8) f.aenderungen = r.str();
+  if (flags & 32) f.sitzplaetze = r.u8();
   return f;
 }
 

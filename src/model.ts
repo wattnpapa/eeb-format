@@ -9,7 +9,7 @@
  * React Native / Capacitor und Node.
  */
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 /**
  * Schema-Version, die ein Transport (QR, JSON) für diesen Bogen fordern muss.
@@ -19,10 +19,12 @@ export const SCHEMA_VERSION = 8;
  * einer klaren Meldung ab, statt sie unmarkiert als echten Bogen anzuzeigen.
  * Ein Stand mit Uhrzeit (Minuten ≠ Mitternacht) ist erst ab Schema 7 kodierbar.
  * Eine Person mit mehr als einer Fahrerlaubnisklasse (B + A) erst ab Schema 8.
+ * Eine abweichende Sitzplatzzahl an einem Fahrzeug erst ab Schema 9.
  */
 export function transportSchemaVersion(
-  b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal">,
+  b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge">>,
 ): number {
+  if (b.fahrzeuge?.some((f) => f.sitzplaetze != null)) return 9;
   if (b.personal.some((p) => p.weitereFahrerlaubnisse?.length)) return 8;
   if (b.stand % MINUTEN_JE_TAG !== 0) return 7;
   return b.uebung ? 6 : 5;
@@ -228,6 +230,14 @@ export interface Fahrzeug {
   funkrufname?: Funkrufname;
   stanKonform?: boolean; // "Ausstattung nach StAN/Norm ja/nein"; undefined = Frage nicht anwendbar
   aenderungen?: string; // "Änderungen bzw. Sondergerät"
+  /**
+   * Sitzplätze inkl. Fahrer/in, wenn sie vom Richtwert des Fahrzeugtyps
+   * abweichen. Nötig, weil derselbe Typ in verschiedenen Baulosen verschieden
+   * viele Plätze hat — ein FüKomKw mit Doppelkabine hat 7 statt der im
+   * Vokabular hinterlegten 3. Fehlt = Richtwert des Typs gilt (der Normalfall).
+   * Ein Bogen, der das Feld nutzt, fordert Schema 9 (transportSchemaVersion).
+   */
+  sitzplaetze?: number;
 }
 
 /** Eine Ebene der Organisationshierarchie (THW: OV/RB/LV; FW: Gemeinde/Landkreis; DRK: KV/LV …). */

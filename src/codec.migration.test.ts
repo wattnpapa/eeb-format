@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 // auskommen, damit derselbe Test unter jsdom laufen kann (ADR-003, Regel 2).
 import { deflateRaw, inflateRaw } from "pako";
 import { decodePayloadUrl, type Kompressor } from "./codec.js";
-import { Ernaehrung, SCHEMA_VERSION } from "./model.js";
+import { Ernaehrung, Fahrerlaubnis, SCHEMA_VERSION } from "./model.js";
 
 const kompressor: Kompressor = {
   deflateRaw: (d) => deflateRaw(d, { level: 9 }),
@@ -70,5 +70,46 @@ describe("Abwärtskompatibilität: alter v2-QR-Code", () => {
       { art: 0, dienstlich: false, wert: "01701234501" },
       { art: 2, dienstlich: false, emailTemplate: 1 },
     ]);
+  });
+});
+
+/**
+ * EINGEFRORENE Golden-Fixture: QR-Payload im Schema v8, erzeugt vor der
+ * Umstellung auf v9 (Sitzplatzzahl am Fahrzeug, Flag 32 im Fahrzeug-Byte).
+ * Auch diese Bytes dürfen sich nie ändern. Sie belegen, dass das neue Flag
+ * den Fahrzeug-Datenstrom nicht verschoben hat: bricht der Test, lesen alle
+ * vor v9 erzeugten Codes ihre Fahrzeuge falsch.
+ *
+ * Inhalt (v8): THW OV Oldenburg, FGr K (A), eine Person mit zwei
+ * Fahrerlaubnisklassen (CE + A), zwei Fahrzeuge (FüKomKw mit Funkrufname und
+ * Änderungen, MzKW als Freitext), Sofortbedarf für 20 Personen.
+ */
+const V8_QR_URL =
+  "https://erfassungsbogen.app/#B.LMAD3ATPYEAN0RTSMUSDVJNUHOUFCOFDM$1NNWDEOQ77QU4NBCC19D-*5FDM5GNHHC0VDFDM$FNPENAMN-JVBOU9WM37ML3N-XDFP45MNXAO92MU4ULNURNULETZ/TF3VMHY2NQ2YE*KG5KVRJUZZTIG3VWDJID/VM6MN38NAMN7NQJDI:-BN7G9O25M0T:GG6IK4N5$LS/DA$JXTJ1550JU9RA7/0J*0";
+
+describe("Abwärtskompatibilität: v8-QR-Code ohne Sitzplatzzahl", () => {
+  const bogen = decodePayloadUrl(V8_QR_URL, kompressor);
+
+  it("wird auf die aktuelle Schema-Version gehoben", () => {
+    expect(bogen.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("liest beide Fahrzeuge unverschoben — ohne erfasste Sitzplatzzahl", () => {
+    expect(bogen.fahrzeuge[0]).toEqual({
+      typ: { code: 3 },
+      kennzeichen: "THW-84397",
+      funkrufname: { kennwort: { code: 1 }, eigenerStandort: true, teile: [18, 13] },
+      stanKonform: true,
+      aenderungen: "Zusatzbeladung \u00d6lwehr",
+    });
+    expect(bogen.fahrzeuge[1]).toEqual({ typ: { freitext: "MzKW" }, kennzeichen: "OL-FW 2041" });
+    expect(bogen.fahrzeuge.every((f) => f.sitzplaetze === undefined)).toBe(true);
+  });
+
+  it("liest die Felder hinter den Fahrzeugen weiter richtig", () => {
+    // Der Beweis, dass nichts verrutscht ist: was im Datenstrom NACH den
+    // Fahrzeugen steht, muss unverändert ankommen.
+    expect(bogen.sofortbedarf).toMatchObject({ verpflegungPersonen: 20, dieselLiter: 200, unterbringung: true });
+    expect(bogen.personal[0]!.weitereFahrerlaubnisse).toEqual([Fahrerlaubnis.A]);
   });
 });

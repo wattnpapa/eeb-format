@@ -189,8 +189,8 @@ describe("ansprechpartner()", () => {
 });
 
 describe("Konstanten", () => {
-  it("SCHEMA_VERSION ist die aktuelle Version 8", () => {
-    expect(SCHEMA_VERSION).toBe(8);
+  it("SCHEMA_VERSION ist die aktuelle Version 9", () => {
+    expect(SCHEMA_VERSION).toBe(9);
     // Sanity: der Meldekopf-Modus ist als eigener Enum-Wert vorhanden.
     expect(PersonalErfassung.NUR_STAERKE).toBe(1);
   });
@@ -213,6 +213,13 @@ describe("Konstanten", () => {
     expect(transportSchemaVersion({ stand: mitternacht, personal: [kf([])] })).toBe(5);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [kf([Fahrerlaubnis.A])] })).toBe(8);
     expect(transportSchemaVersion({ uebung: true, stand: mitternacht + 639, personal: [kf([Fahrerlaubnis.A])] })).toBe(8);
+    // Eine abweichende Sitzplatzzahl fordert Schema 9; Fahrzeuge ohne das Feld
+    // (der Normalfall) lassen die Version, wo sie war.
+    const fz = (sitzplaetze?: number) => ({ typ: { code: 3 }, ...(sitzplaetze != null ? { sitzplaetze } : {}) });
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz()] })).toBe(5);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz(7)] })).toBe(9);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz(0)] })).toBe(9);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [kf([Fahrerlaubnis.A])], fahrzeuge: [fz(7)] })).toBe(9);
   });
 
   it("alleFahrerlaubnisse: Haupt- und weitere Klassen, ohne NONE und Dubletten", () => {
