@@ -146,6 +146,19 @@ describe("Binär-Roundtrip (encodeBinaer/decodeBinaer)", () => {
     expect(encodeBinaer(basisBogen())[0]).toBe(7);
   });
 
+  it("eine abweichende Dienststelle fordert Schema 10 und übersteht den Roundtrip", () => {
+    const b = basisBogen();
+    b.personal[1]!.dienststelle = "Nienburg";
+    expect(encodeBinaer(b)[0]).toBe(10);
+    gleich(decodeBinaer(encodeBinaer(b)), b);
+    // Leer gesetzt zählt wie „nicht gesetzt": kein Schema-Sprung, und der
+    // Roundtrip liefert das Feld gar nicht erst zurück.
+    const leer = basisBogen();
+    leer.personal[0]!.dienststelle = "";
+    expect(encodeBinaer(leer)[0]).toBe(7);
+    expect(decodeBinaer(encodeBinaer(leer)).personal[0]!.dienststelle).toBeUndefined();
+  });
+
   it("erhält die Uhrzeit im Stand über den Roundtrip", () => {
     expect(decodeBinaer(encodeBinaer(basisBogen())).stand).toBe(zeitpunktAusIso("2026-05-14T10:39"));
   });

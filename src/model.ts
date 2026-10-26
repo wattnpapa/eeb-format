@@ -9,7 +9,7 @@
  * React Native / Capacitor und Node.
  */
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 /**
  * Schema-Version, die ein Transport (QR, JSON) für diesen Bogen fordern muss.
@@ -24,6 +24,7 @@ export const SCHEMA_VERSION = 9;
 export function transportSchemaVersion(
   b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge">>,
 ): number {
+  if (b.personal.some((p) => p.dienststelle)) return 10;
   if (b.fahrzeuge?.some((f) => f.sitzplaetze != null)) return 9;
   if (b.personal.some((p) => p.weitereFahrerlaubnisse?.length)) return 8;
   if (b.stand % MINUTEN_JE_TAG !== 0) return 7;
@@ -202,6 +203,13 @@ export interface Person {
    * Bogen, der das Feld nutzt, fordert Schema 8 (transportSchemaVersion).
    */
   weitereFahrerlaubnisse?: Fahrerlaubnis[];
+  /**
+   * Dienststelle (THW: Ortsverband) der Person, wenn sie NICHT die der Einheit
+   * ist — bei Einheiten, die aus Helfern mehrerer Dienststellen zusammengestellt
+   * sind. Fehlt = Dienststelle der Einheit (`einheit.hierarchie[0]`). Nur
+   * gesetzt, wenn nicht leer — ein Bogen, der das Feld nutzt, fordert Schema 10.
+   */
+  dienststelle?: string;
   geschlecht: Geschlecht; // → Unterbringung M/W/D wird abgeleitet
   ernaehrung: Ernaehrung; // → Verpflegung (vegetarisch/vegan) wird abgeleitet
   kontakte: Kontakt[]; // i. d. R. nur Führungskräfte

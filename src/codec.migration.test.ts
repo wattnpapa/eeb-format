@@ -113,3 +113,39 @@ describe("Abwärtskompatibilität: v8-QR-Code ohne Sitzplatzzahl", () => {
     expect(bogen.personal[0]!.weitereFahrerlaubnisse).toEqual([Fahrerlaubnis.A]);
   });
 });
+
+/**
+ * EINGEFRORENE v9-Fixture (erzeugt mit dem Schema-9-Encoder vor der Einführung
+ * von `Person.dienststelle` in Schema 10). Sie belegt, dass die Dienststelle
+ * hinter dem Fahrerlaubnis-Zähler nur ab Schema 10 gelesen wird: Für v9-Bögen
+ * darf dort kein String erwartet werden, sonst verrutschen Funktionen,
+ * Kontakte und alles dahinter.
+ *
+ * Inhalt (v9): THW OV Oldenburg, FGr K (A), 2 Personen (erste mit weiterer
+ * Fahrerlaubnis A), 1 Fahrzeug mit 7 Sitzplätzen, Sofortbedarf 2 Personen.
+ */
+const V9_QR_URL =
+  "https://erfassungsbogen.app/#B.LMAD3A/RYY-HAPM/4M/RNP6MH8MDP9DR5OA7$HRB8E-ED2A7K5U83YTUM-C5SL59BJ1L-2JLD:TCMYH751-L-WUG-0S92$I-G/T1VS*2F6KOASM9YNBEL6-L:0$4Y6BDL13A6C0PEL8W6JKIP/K0FY-8BWOAIDL9Y1E*1HQ1ZVNXS4*DS4*58:M:0$APB9Y1YNB00";
+
+describe("Abwärtskompatibilität: v9-QR-Code ohne Dienststelle je Person", () => {
+  const bogen = decodePayloadUrl(V9_QR_URL, kompressor);
+
+  it("wird auf die aktuelle Schema-Version gehoben", () => {
+    expect(bogen.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("liest die Personen unverschoben — ohne Dienststelle", () => {
+    expect(bogen.personal.map((p) => `${p.vorname} ${p.nachname}`)).toEqual(["Johannes Rudolph", "Anna Weber"]);
+    expect(bogen.personal.every((p) => p.dienststelle === undefined)).toBe(true);
+    expect(bogen.personal[0]!.weitereFahrerlaubnisse).toEqual([Fahrerlaubnis.A]);
+    expect(bogen.personal[0]!.funktionen).toEqual([{ code: 7 }]);
+    expect(bogen.personal[0]!.kontakte).toEqual([{ art: 0, dienstlich: true, wert: "01701234501" }]);
+    expect(bogen.personal[0]!.zusatzqualifikationen).toEqual([{ code: 12 }]);
+    expect(bogen.personal[1]!.ernaehrung).toBe(Ernaehrung.VEGETARISCH);
+  });
+
+  it("liest die Felder hinter dem Personal weiter richtig", () => {
+    expect(bogen.fahrzeuge[0]).toEqual({ typ: { code: 3 }, kennzeichen: "THW-84397", sitzplaetze: 7 });
+    expect(bogen.sofortbedarf).toMatchObject({ verpflegungPersonen: 2, dieselLiter: 50, ruhezeitErforderlich: true });
+  });
+});

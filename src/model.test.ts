@@ -189,8 +189,8 @@ describe("ansprechpartner()", () => {
 });
 
 describe("Konstanten", () => {
-  it("SCHEMA_VERSION ist die aktuelle Version 9", () => {
-    expect(SCHEMA_VERSION).toBe(9);
+  it("SCHEMA_VERSION ist die aktuelle Version 10", () => {
+    expect(SCHEMA_VERSION).toBe(10);
     // Sanity: der Meldekopf-Modus ist als eigener Enum-Wert vorhanden.
     expect(PersonalErfassung.NUR_STAERKE).toBe(1);
   });
@@ -220,6 +220,10 @@ describe("Konstanten", () => {
     expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz(7)] })).toBe(9);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz(0)] })).toBe(9);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [kf([Fahrerlaubnis.A])], fahrzeuge: [fz(7)] })).toBe(9);
+    // Eine abweichende Dienststelle fordert Schema 10; leer zählt nicht.
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "Nienburg" }] })).toBe(10);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "" }] })).toBe(5);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "Nienburg" }], fahrzeuge: [fz(7)] })).toBe(10);
   });
 
   it("alleFahrerlaubnisse: Haupt- und weitere Klassen, ohne NONE und Dubletten", () => {

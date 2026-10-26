@@ -182,6 +182,9 @@ function encodePerson(w: Writer, p: Person, version: number): void {
     w.varint(weitere.length);
     for (const k of weitere) w.u8(k);
   }
+  // Abweichende Dienststelle (Schema 10). Meist leer — der Längen-Varint 0
+  // komprimiert sich in der 0-Serie weg.
+  if (version >= 10) w.str(p.dienststelle ?? "");
   w.varint(p.funktionen.length);
   for (const f of p.funktionen) w.vokab(f);
   w.varint(p.kontakte.length);
@@ -344,6 +347,11 @@ function decodePerson(r: Reader, version: number): Person {
       p.weitereFahrerlaubnisse = [];
       for (let i = 0; i < anzahl; i++) p.weitereFahrerlaubnisse.push(r.u8());
     }
+  }
+  if (version >= 10) {
+    // Nur bei Inhalt setzen (wie `weitereFahrerlaubnisse`): leer heißt „wie die Einheit".
+    const dienststelle = r.str();
+    if (dienststelle) p.dienststelle = dienststelle;
   }
   for (let i = r.varint(); i > 0; i--) p.funktionen.push(r.vokab());
   for (let i = r.varint(); i > 0; i--) p.kontakte.push(decodeKontakt(r));
