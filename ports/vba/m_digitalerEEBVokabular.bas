@@ -4,8 +4,7 @@ Attribute VB_Name = "m_digitalerEEBVokabular"
 '
 '  GENERIERT - nicht von Hand aendern. Quelle: erfassungsbogen.app,
 '  npm run vokabular:excel-vba (scripts/excel-vokabular-vba.mts).
-'  347 Einträge, Stand des Vokabulars zum Zeitpunkt der Erzeugung
-'  (bos-vokabulare 2f94a46: Einheitstyp 46 und Fahrzeugtyp 27 nachgetragen).
+'  347 Einträge, Stand des Vokabulars: bos-vokabulare 2f94a46.
 '
 '  Die Codes im QR-Code sind append-only: eine ältere Tabelle liest neuere
 '  Bögen weiter, unbekannte Codes erscheinen als "#123". Zum Nachziehen das
