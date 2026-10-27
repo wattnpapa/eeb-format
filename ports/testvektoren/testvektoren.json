@@ -1,0 +1,579 @@
+{
+  "_hinweis": "GENERIERT aus dem TypeScript-Codec (scripts/testvektoren.mts) — nicht von Hand ändern. Jede Portierung unter ports/ muss jeden Vektor hier so dekodieren, dass die Felder `erwartet` entsprechen. `erwartet` ist der Bogen NACH Migration (schemaVersion = aktuelle SCHEMA_VERSION); `schemaImStrom` ist die Version im Bytestrom.",
+  "schemaVersion": 10,
+  "epoche": "2020-01-01 (EebDatum = Tage, EebZeitpunkt = Minuten seit Epoche, lokale Wandzeit)",
+  "vektoren": [
+    {
+      "name": "minimal",
+      "hinweis": "Nur Pflichtfelder, manuelle Stärke, Feuerwehr mit Freitext-Einheitstyp.",
+      "schemaImStrom": 5,
+      "binaerHex": "05bb090201204672656977696c6c696765204665756572776568722057617264656e6275726700094cc3b67363687a7567000100010a57617264656e6275726700bb09bb090e4265726569747374656c6c756e670301020600000000",
+      "payloadHex": "4545423263ddcdc9c4a8e056949a599e999393999eaae0965a9a5a549e9a51a4109e5894929a97545a94cec0e973785b71724655693a032303231792cc6ecedd9c7c4ea945a99925c525a93939a579e9cc8c4c6c0c400000",
+      "url": "https://erfassungsbogen.app/#B.LMAD3AM8F*DV*-TU6YZPMNQD*FNOJMS6OC8YTWD0VDC6OVHCVL23KDFDM$1NNWD-JVQMZKDIEBH6TA11GOJ0OJ07O3I5VQKV3YN6:B/OA9DN/0UPVP-V88NI76V7QBKZ1000",
+      "urlBase64": "https://erfassungsbogen.app/#RUVCMmPdzcnEqOBWlJpZnpmTk5mequCWWppaVJ6aUaQQnliUkpqXVFqUzsDpc3hbcXJGVWk6AyMDIxeSzG7O3Zx8TqlFqZklxSWpOTmleenMjExsDEAAAA",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 3587040,
+        "einheit": {
+          "organisation": 2,
+          "einheitsTyp": {
+            "freitext": "Löschzug"
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Wardenburg"
+            }
+          ],
+          "organisationName": "Freiwillige Feuerwehr Wardenburg"
+        },
+        "einsatz": {
+          "zeitraumVon": 2491,
+          "zeitraumBis": 2491,
+          "ortAuftrag": "Bereitstellung"
+        },
+        "personalErfassung": 1,
+        "personal": [],
+        "fahrzeuge": [],
+        "staerkeManuell": {
+          "fuehrer": 1,
+          "unterfuehrer": 2,
+          "mannschaft": 6,
+          "gesamt": 9
+        }
+      }
+    },
+    {
+      "name": "schema-5",
+      "hinweis": "Inhalt fordert nur Schema 5 — der heutige Encoder schreibt dann auch Schema 5 (transportSchemaVersion).",
+      "schemaImStrom": 5,
+      "binaerHex": "05bb090500000c5345472053616e6974c3a47400020001094f6c64656e6275726700020e4f6c64656e627572672d4c616e6400bb09bb090e4265726569747374656c6c756e6700010343656d0659696c6d617a450201000e4772757070656e66c3bc687265720000010000034b5457094f4c2d524b203132330000",
+      "payloadHex": "4545423263ddcdc9cac0c013eceaae109c9897597278490903130323a77f4e4a6a5e5269513a03131f9cadeb939897c2b09b7337279f536a516a664971496a4e4e695e3a0323b3736a2e5b64664e6e62952b1323039f7b516941416a5edae13d1945a9450c0c8c0c0cccde21e19cfe3eba41de0a8646c60c0c00",
+      "url": "https://erfassungsbogen.app/#B.LMAD3AM8F*DV/ZUCATB3$YKQVYN02NUHH15B8J0OJ0YKPY*B68GNMC7FC8J0FX4-JQNJMN4NT$QGMHG16YSCEGCRNFEAHV7GO-BEEEOJ0JDR:6GQ*DWNF9XGGTMK*2PM0:VI81GI/9AIEFCYWY3*VP9Y1IDL*-1/XXSEYJT-/ESGXXGIKO6U-X1",
+      "urlBase64": "https://erfassungsbogen.app/#RUVCMmPdzcnKwMAT7OquEJyYl1lyeEkJAxMDI6d_TkpqXlJpUToDEx-creuTmJfCsJtzNyefU2pRamZJcUlqTk5pXjoDI7Nzai5bZGZObmKVKxMjA597UWlBQWpe2uE9GUWpRQwMjAwMzN4h4Zz-PrpB3gqGRsYMDAA",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 3587040,
+        "einheit": {
+          "organisation": 5,
+          "einheitsTyp": {
+            "freitext": "SEG Sanität"
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Oldenburg"
+            },
+            {
+              "bezeichnung": {
+                "code": 2
+              },
+              "name": "Oldenburg-Land"
+            }
+          ]
+        },
+        "einsatz": {
+          "zeitraumVon": 2491,
+          "zeitraumBis": 2491,
+          "ortAuftrag": "Bereitstellung"
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Cem",
+            "nachname": "Yilmaz",
+            "fahrerlaubnis": 5,
+            "geschlecht": 0,
+            "staerkeRolle": 1,
+            "ernaehrung": 2,
+            "funktionen": [
+              {
+                "freitext": "Gruppenführer"
+              }
+            ],
+            "kontakte": [],
+            "zusatzqualifikationen": []
+          }
+        ],
+        "fahrzeuge": [
+          {
+            "typ": {
+              "freitext": "KTW"
+            },
+            "kennzeichen": "OL-RK 123"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voll-schema-10",
+      "hinweis": "Jedes Feld bis Schema 10 belegt: Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie.",
+      "schemaImStrom": 10,
+      "binaerHex": "0adebd360001000400020701094f6c64656e627572670b04411234567f136f762d6f6c64656e62757267407468772e6465024f4c0002094f6c64656e6275726703bb09bd091a4465696368766572746569646967756e6720456c73666c65746838be360058cb36001c01010001000204416e6e61074dc3bc6c6c65729501020a040e4f562044656c6d656e686f7273740203001244656963686661636862657261746572696e02040b01701234567f0218616e6e612e6d75656c6c6572406578616d706c652e6f72670320001642657275663a20456c656b74726f6e696b65722f696e001842657275663a204b72616e6b656e70666c656765722f696e0342656e06536368756c7a0900000001050101080441987601001152657474756e677373636877696d6d6572032f04095448572d383132333401010216331f416e68c3a46e6765726b7570706c756e67206e616368676572c3bc7374657407051b095448572d383132393900010b44656c6d656e686f72737402561900000a5072697661742d506b7700010278000503012954657374626f67656e20536368656d612031302066c3bc722064696520506f7274696572756e67656e",
+      "payloadHex": "454542324d8fdf4a1b4114c6cfcc6e9a6e02855a105b0bce6d2f126b95a0bd32a250684b824adadbc9e6ecccb0b36797b3b38978e35314fa007d8bc6dee4b2efe0b39448456f7fdf1fbeaf73773b000131c8b648467e86346dd874e3e1c6c1e4e65539ef950fec38d8457f8672f405e4a333fa9ddc266f4ed1a5768e1cd0cd9c69c8a8335f671e833dfc3380ef7f07f056081020e321916e7f5d2dbd47fe2164277e319aa853f405922db90e32828dfbb64ca7768aac03b223197745b55e24b73491ee170dae0b8ef14a1795c77ec92652b07982dc641fd599c73c70492e47de75045bfff967d6942355994773af442748cf2e52dbf8eb0400444b88e7f1f0e75cc0cb730ca12153d7a95db8a2408e76e3e4f2d3b7dee1de87fd0321e4e6fece90ecea1719e4bca92abf7e4d3ab50679b5ac0386766bfb21717404a2fbf4e5e4354067cc6eae436f9c2f40c82b6845e2dd25d6615a1a2475915a2cb4da7bafb2d592d5cca11a971c1c724306e91f",
+      "url": "https://erfassungsbogen.app/#B.LMAD3ABXB80Y764T63JQVOYG$UGQCK5K2TW1UPG0X2AWMDXSJTO8$FLYJLDXQUUM2$C*QXVF1FRE-KGPY:73230UBLT-XAAR09YZNMMNAHJJ8Y4KTQJ6I100YN76VR6UA/HKZTGYWHTFYQLT73ZUX8TSM-/ZF-WAHJVKHW$00ZOX6-OLX:-G0-VA2I*F4XCVK4G9PPSLELQ41I9NY7GJ$N8174DSI27OY26MAGJO/6L/AK35O06TM70QPQ6*TAMJ7SFS7LPLAVRPKPZ4L3N06E5T6IIPRAO5908PA$H326V1OU$AO3PFU/PUCOCSKI4NXVY47HNF89-5BU-AQXHH0EA:*XRWPF52ENDPHMFAP3B927JKXHWZR10PKB9DZ7S$55ED:UZ*1335NYW7BE3TOLSL-SY7:$20SCGY4TKMJ09ZY:W-$2MQQZR-3:TS*K6P9JN-8H:0ERR0M0G1I1A-GBH-S07F-H0ZK484XF3ZG2BA8WNKZ91P6EQAXRXNQWOTDQM5N5M5X67BX1VQLLW-MW*LOL0NPD4K8AOKZ",
+      "urlBase64": "https://erfassungsbogen.app/#RUVCMk2P30obQRTGz8xumm4ChVoQWwvObS8Sa5WgvTKiUGhLgkra28nm7Myws2eXs7OJeONTFPoAfYvG3uSy7-CzlEhFb3_fH76vc3c7AAExyLZIRn6GNG3YdOPhxsHk5lU575UP7DjYRX-GcvQF5KMz-p3cJm9O0aV2jhzQzZxpyKgzX2cegz38M4DvfwfwVggQIOMhkW5_XS29R_4hZCd-MZqoU_QFki25DjKCjfu2TKd2iqwDsiMZd0W1XiS3NJHuFw2uC47xSheVx37JJlKweYLcZB_Vmcc8cEkuR951BFv_-WfWlCNVmUdzr0QnSM8uUtv46wQAREuI5_Hw51zAy3MMoSFT16lduKJAjnbj5PLTt97h3of9AyHk5v7OkOzqFxnkvKkqv35NOrUGebWsA4Z2a_shcXQEovv05eQ1QGfMbq5Db5wvQMgraEXi3SXWYVoaJHWRWiy02nuvstWS1cyhGpccHHJDBukf",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 3587550,
+        "einheit": {
+          "organisation": 1,
+          "einheitsTyp": {
+            "code": 4
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Oldenburg",
+              "telefon": "04411234567",
+              "email": "ov-oldenburg@thw.de",
+              "kurz": "OL"
+            },
+            {
+              "bezeichnung": {
+                "code": 2
+              },
+              "name": "Oldenburg"
+            }
+          ]
+        },
+        "einsatz": {
+          "zeitraumVon": 2491,
+          "zeitraumBis": 2493,
+          "ortAuftrag": "Deichverteidigung Elsfleth",
+          "einsatzbeginn": 3587640,
+          "einsatzende": 3591000
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Anna",
+            "nachname": "Müller",
+            "fahrerlaubnis": 5,
+            "geschlecht": 1,
+            "staerkeRolle": 2,
+            "ernaehrung": 1,
+            "funktionen": [
+              {
+                "code": 3
+              },
+              {
+                "freitext": "Deichfachberaterin"
+              }
+            ],
+            "kontakte": [
+              {
+                "art": 0,
+                "dienstlich": true,
+                "wert": "01701234567"
+              },
+              {
+                "art": 2,
+                "dienstlich": false,
+                "wert": "anna.mueller@example.org"
+              }
+            ],
+            "zusatzqualifikationen": [
+              {
+                "code": 32
+              },
+              {
+                "freitext": "Beruf: Elektroniker/in"
+              },
+              {
+                "freitext": "Beruf: Krankenpfleger/in"
+              }
+            ],
+            "weitereFahrerlaubnisse": [
+              10,
+              4
+            ],
+            "dienststelle": "OV Delmenhorst"
+          },
+          {
+            "vorname": "Ben",
+            "nachname": "Schulz",
+            "fahrerlaubnis": 9,
+            "geschlecht": 0,
+            "staerkeRolle": 0,
+            "ernaehrung": 0,
+            "funktionen": [
+              {
+                "code": 5
+              }
+            ],
+            "kontakte": [
+              {
+                "art": 1,
+                "dienstlich": false,
+                "wert": "04419876"
+              }
+            ],
+            "zusatzqualifikationen": [
+              {
+                "freitext": "Rettungsschwimmer"
+              }
+            ]
+          }
+        ],
+        "fahrzeuge": [
+          {
+            "typ": {
+              "code": 4
+            },
+            "kennzeichen": "THW-81234",
+            "funkrufname": {
+              "kennwort": {
+                "code": 1
+              },
+              "eigenerStandort": true,
+              "teile": [
+                22,
+                51
+              ]
+            },
+            "stanKonform": true,
+            "aenderungen": "Anhängerkupplung nachgerüstet",
+            "sitzplaetze": 7
+          },
+          {
+            "typ": {
+              "code": 27
+            },
+            "kennzeichen": "THW-81299",
+            "funkrufname": {
+              "kennwort": {
+                "code": 1
+              },
+              "eigenerStandort": false,
+              "teile": [
+                86,
+                25
+              ],
+              "ort": "Delmenhorst"
+            },
+            "stanKonform": false
+          },
+          {
+            "typ": {
+              "freitext": "Privat-Pkw"
+            },
+            "kennzeichen": ""
+          }
+        ],
+        "uebung": true,
+        "unterbringungManuell": {
+          "m": 1,
+          "w": 1,
+          "d": 0
+        },
+        "verpflegungManuell": {
+          "vegetarisch": 1,
+          "vegan": 0
+        },
+        "sofortbedarf": {
+          "verpflegungPersonen": 2,
+          "dieselLiter": 120,
+          "benzinLiter": 0,
+          "gemischLiter": 5,
+          "unterbringung": true,
+          "ruhezeitErforderlich": true
+        },
+        "sonstiges": "Testbogen Schema 10 für die Portierungen"
+      },
+      "segmente": {
+        "anzahl": 3,
+        "id": 2080433610,
+        "urls": [
+          "https://erfassungsbogen.app/#EEBS.1.3.2080433610.B.LMAD3ABXB80Y764T63JQVOYG$UGQCK5K2TW1UPG0X2AWMDXSJTO8$FLYJLDXQUUM2$C*QXVF1FRE-KGPY:73230UBLT-XAAR09YZNMMNAHJJ8Y4KTQJ6I100YN76VR6UA/HKZTGYWHTFYQLT73ZUX8TSM-/ZF-WAHJVKHW$00ZOX6-OLX:-G0-V",
+          "https://erfassungsbogen.app/#EEBS.2.3.2080433610.B.A2I*F4XCVK4G9PPSLELQ41I9NY7GJ$N8174DSI27OY26MAGJO/6L/AK35O06TM70QPQ6*TAMJ7SFS7LPLAVRPKPZ4L3N06E5T6IIPRAO5908PA$H326V1OU$AO3PFU/PUCOCSKI4NXVY47HNF89-5BU-AQXHH0EA:*XRWPF52ENDPHMFAP3B927",
+          "https://erfassungsbogen.app/#EEBS.3.3.2080433610.B.JKXHWZR10PKB9DZ7S$55ED:UZ*1335NYW7BE3TOLSL-SY7:$20SCGY4TKMJ09ZY:W-$2MQQZR-3:TS*K6P9JN-8H:0ERR0M0G1I1A-GBH-S07F-H0ZK484XF3ZG2BA8WNKZ91P6EQAXRXNQWOTDQM5N5M5X67BX1VQLLW-MW*LOL0NPD4K8AOKZ"
+        ]
+      }
+    },
+    {
+      "name": "alt-schema-2",
+      "hinweis": "Person ohne Ernährungs-Byte, Sofortbedarf mit davonVegetarisch-Byte, Base64url ohne Marker.",
+      "schemaImStrom": 2,
+      "payloadHex": "45454232635ac1cec8a02de81fa6e09f93929a97545a94aea0abe097c9c8cac8872ac2cde268c2c8cacfe2efefe2cab0827d35bbac5b6a515e6e6a4e4a6a5262e9e13d49a579e90ade8949a93949399925550ccc1c5ef919897979a9c5ec41a529f93905199d8cec4c0cdc8c05422601f25c8c0c2c8e797989ace1a949a945020c0c0ccc21f9b9ec6e99c5c919a945ac0c0c0c8cc28c6b27b3328a3033800000",
+      "url": "https://erfassungsbogen.app/#RUVCMmNawc7IoC3oH6bgn5OSmpdUWpSuoKvgl8nIysiHKsLN4mjCyMrP4u_v4sqwgn01u6xbalFebmpOSmpSYunhPUmleekK3olJqTlJOZklVQzMHF75GYl5eanF7EGlKfk5BRmdjOxMDNyMBUImAfJcjAwsjnl5iazhqUmpRQIMDAzMIfm57G6ZxckZqUWsDAwMjMKMayezMoowM4AAAA",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 2822400,
+        "einheit": {
+          "organisation": 1,
+          "einheitsTyp": {
+            "code": 43
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Oldenburg - Ni",
+              "telefon": "04413401050",
+              "kurz": "OODE"
+            }
+          ]
+        },
+        "einsatz": {
+          "zeitraumVon": 1960,
+          "zeitraumBis": 1963,
+          "ortAuftrag": "Fernmeldebauübung Kabelblitz"
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Johannes",
+            "nachname": "Rudolph",
+            "fahrerlaubnis": 9,
+            "geschlecht": 0,
+            "staerkeRolle": 2,
+            "ernaehrung": 0,
+            "funktionen": [
+              {
+                "code": 7
+              }
+            ],
+            "kontakte": [
+              {
+                "art": 0,
+                "dienstlich": false,
+                "wert": "01701234501"
+              },
+              {
+                "art": 2,
+                "dienstlich": false,
+                "emailTemplate": 1
+              }
+            ],
+            "zusatzqualifikationen": []
+          },
+          {
+            "vorname": "Anna",
+            "nachname": "Weber",
+            "fahrerlaubnis": 0,
+            "geschlecht": 1,
+            "staerkeRolle": 0,
+            "ernaehrung": 0,
+            "funktionen": [],
+            "kontakte": [],
+            "zusatzqualifikationen": []
+          },
+          {
+            "vorname": "Tom",
+            "nachname": "Fischer",
+            "fahrerlaubnis": 5,
+            "geschlecht": 0,
+            "staerkeRolle": 0,
+            "ernaehrung": 0,
+            "funktionen": [],
+            "kontakte": [],
+            "zusatzqualifikationen": []
+          }
+        ],
+        "fahrzeuge": [
+          {
+            "typ": {
+              "code": 1
+            },
+            "stanKonform": true
+          }
+        ],
+        "sofortbedarf": {
+          "verpflegungPersonen": 20,
+          "dieselLiter": 0,
+          "benzinLiter": 0,
+          "gemischLiter": 0,
+          "unterbringung": false,
+          "ruhezeitErforderlich": false
+        },
+        "verpflegungManuell": {
+          "vegetarisch": 3,
+          "vegan": 0
+        }
+      }
+    },
+    {
+      "name": "alt-schema-8",
+      "hinweis": "Weitere Fahrerlaubnisklassen vorhanden, noch ohne Sitzplatzzahl (Flag 32) und Dienststelle.",
+      "schemaImStrom": 8,
+      "payloadHex": "45454232e36098afc2c0c8a0cdc0c8c0c8e79f93929a97545a94aea0abe097c950c356cf26e8929a999c51965a54929a9992995e9a97cec0c8e1959f919897975acc1e549a929f5390d1c5c0c8c2c8c8c0c0c4cfcc19e211ae6b61626c69cec8c824c42b16555a9c585295949a9398529a97ae70785a4e796a461103038b6f95773897bf8fae5bb88291818921a3c809460606460600",
+      "url": "https://erfassungsbogen.app/#B.LMAD3ATPYEAN0RTSMUSDVJNUHOUFCOFDM$1NNWDEOQ77QU4NBCC19D-*5FDM5GNHHC0VDFDM$FNPENAMN-JVBOU9WM37ML3N-XDFP45MNXAO92MU4ULNURNULETZ/TF3VMHY2NQ2YE*KG5KVRJUZZTIG3VWDJID/VM6MN38NAMN7NQJDI:-BN7G9O25M0T:GG6IK4N5$LS/DA$JXTJ1550JU9RA7/0J*0",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 2400000,
+        "einheit": {
+          "organisation": 1,
+          "einheitsTyp": {
+            "code": 43
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Oldenburg - Ni"
+            }
+          ]
+        },
+        "einsatz": {
+          "zeitraumVon": 1660,
+          "zeitraumBis": 1663,
+          "ortAuftrag": "Deichverteidigung"
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Johannes",
+            "nachname": "Rudolph",
+            "fahrerlaubnis": 10,
+            "geschlecht": 0,
+            "staerkeRolle": 2,
+            "ernaehrung": 0,
+            "funktionen": [
+              {
+                "code": 1
+              }
+            ],
+            "kontakte": [],
+            "zusatzqualifikationen": [],
+            "weitereFahrerlaubnisse": [
+              4
+            ]
+          }
+        ],
+        "fahrzeuge": [
+          {
+            "typ": {
+              "code": 3
+            },
+            "kennzeichen": "THW-84397",
+            "funkrufname": {
+              "kennwort": {
+                "code": 1
+              },
+              "eigenerStandort": true,
+              "teile": [
+                18,
+                13
+              ]
+            },
+            "stanKonform": true,
+            "aenderungen": "Zusatzbeladung Ölwehr"
+          },
+          {
+            "typ": {
+              "freitext": "MzKW"
+            },
+            "kennzeichen": "OL-FW 2041"
+          }
+        ],
+        "sofortbedarf": {
+          "verpflegungPersonen": 20,
+          "dieselLiter": 200,
+          "benzinLiter": 0,
+          "gemischLiter": 0,
+          "unterbringung": true,
+          "ruhezeitErforderlich": false
+        }
+      }
+    },
+    {
+      "name": "alt-schema-9",
+      "hinweis": "Sitzplatzzahl am Fahrzeug, noch ohne Dienststelle je Person — hinter dem Fahrerlaubnis-Zähler folgt direkt die Funktionsliste.",
+      "schemaImStrom": 9,
+      "payloadHex": "45454232e3bc75d9948191419b81918591cf3f2725352fa9b4285d4157c12f93c5dfdfc5956122e7244e7e8ffce48cf2c4e2e2d422058ffcca4406260eaffc8cc4bcbcd462f6a0d294fc9c828c2e9001ec8c2cdc8c05422601f28c3c2c8e797989ace1a949a945a28c0c0c0c0c8c0acc9c211ee1ba1626c696e6ec8c4c460c0c4c0c00",
+      "url": "https://erfassungsbogen.app/#B.LMAD3A/RYY-HAPM/4M/RNP6MH8MDP9DR5OA7$HRB8E-ED2A7K5U83YTUM-C5SL59BJ1L-2JLD:TCMYH751-L-WUG-0S92$I-G/T1VS*2F6KOASM9YNBEL6-L:0$4Y6BDL13A6C0PEL8W6JKIP/K0FY-8BWOAIDL9Y1E*1HQ1ZVNXS4*DS4*58:M:0$APB9Y1YNB00",
+      "erwartet": {
+        "schemaVersion": 10,
+        "stand": 3527642,
+        "einheit": {
+          "organisation": 1,
+          "einheitsTyp": {
+            "code": 43
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Oldenburg - Ni",
+              "kurz": "OODE"
+            }
+          ]
+        },
+        "einsatz": {
+          "zeitraumVon": 2449,
+          "zeitraumBis": 2450,
+          "ortAuftrag": "Hochwasser Hoya"
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Johannes",
+            "nachname": "Rudolph",
+            "fahrerlaubnis": 10,
+            "geschlecht": 0,
+            "staerkeRolle": 2,
+            "ernaehrung": 0,
+            "funktionen": [
+              {
+                "code": 7
+              }
+            ],
+            "kontakte": [
+              {
+                "art": 0,
+                "dienstlich": true,
+                "wert": "01701234501"
+              }
+            ],
+            "zusatzqualifikationen": [
+              {
+                "code": 12
+              }
+            ],
+            "weitereFahrerlaubnisse": [
+              4
+            ]
+          },
+          {
+            "vorname": "Anna",
+            "nachname": "Weber",
+            "fahrerlaubnis": 5,
+            "geschlecht": 1,
+            "staerkeRolle": 0,
+            "ernaehrung": 1,
+            "funktionen": [],
+            "kontakte": [],
+            "zusatzqualifikationen": []
+          }
+        ],
+        "fahrzeuge": [
+          {
+            "typ": {
+              "code": 3
+            },
+            "kennzeichen": "THW-84397",
+            "sitzplaetze": 7
+          }
+        ],
+        "sofortbedarf": {
+          "verpflegungPersonen": 2,
+          "dieselLiter": 50,
+          "benzinLiter": 0,
+          "gemischLiter": 0,
+          "unterbringung": false,
+          "ruhezeitErforderlich": true
+        }
+      }
+    }
+  ]
+}

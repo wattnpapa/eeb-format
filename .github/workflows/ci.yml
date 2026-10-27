@@ -7,6 +7,9 @@
 #   test       — dieselben Testdateien unter node UND jsdom (Regel 2)
 #   build      — belegt, dass dist/ samt Typdeklarationen entsteht; ohne das
 #                bekommt ein Konsument beim npm install ein leeres Paket
+#   ports      — die Portierungen unter ports/ (VBA, …) nennen die aktuelle
+#                SCHEMA_VERSION und die Testvektoren entsprechen dem Codec
+#                (siehe CLAUDE.md); läuft nach build, weil er dist/ liest
 
 name: CI
 
@@ -33,3 +36,4 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run ports:pruefen

@@ -32,7 +32,9 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "test": "vitest run --reporter=verbose",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "ports:testvektoren": "npm run build && node scripts/testvektoren.mts",
+    "ports:pruefen": "node scripts/testvektoren.mts --pruefen"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

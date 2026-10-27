@@ -48,6 +48,15 @@ hineingereicht — im Browser pako, unter Node `node:zlib`. Deshalb kommt der
 Codec ohne beides aus, und deshalb benutzen auch die Tests pako statt
 `node:zlib`: nur so läuft derselbe Test unter `node` und unter `jsdom`.
 
+## Portierungen in andere Sprachen (`ports/`)
+
+Neben der TypeScript-Referenz liegen unter `ports/` handgepflegte Leser des
+Formats in anderen Sprachen — derzeit VBA für Excel-Arbeitsmappen
+(`ports/vba/`). Sie werden nicht generiert, sondern bei jeder Formatänderung
+im selben Commit nachgezogen; `CLAUDE.md` beschreibt die Regel, und
+`npm run ports:pruefen` (CI) hält jede Portierung und die Testvektoren
+`ports/testvektoren/testvektoren.json` gegen `SCHEMA_VERSION`.
+
 ## Aufnahmeregeln (ADR-003)
 
 Was in diesen Kern darf, entscheiden diese sechs Regeln:
@@ -91,6 +100,7 @@ npm run build    # dist/index.js plus dist/index.d.ts
 npm run typecheck
 npm run lint
 npm test         # ein Lauf, zwei Umgebungen: node und jsdom
+npm run ports:pruefen   # Portierungen und Testvektoren auf Stand (liest dist/)
 ```
 
 ### Zwei TypeScript-Versionen nebeneinander

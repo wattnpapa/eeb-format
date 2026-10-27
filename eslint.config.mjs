@@ -110,7 +110,7 @@ export default tseslint.config(
   {
     // Konfigurationsdateien liegen außerhalb des ausgelieferten Kerns und
     // dürfen daher Werkzeugpakete einbinden.
-    files: ["*.mjs", "*.ts", "vitest.config.ts"],
+    files: ["*.mjs", "*.ts", "vitest.config.ts", "scripts/**/*.mts"],
     ignores: ["src/**"],
     ...tseslint.configs.disableTypeChecked,
   },

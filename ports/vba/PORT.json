@@ -1,0 +1,23 @@
+{
+  "sprache": "VBA (Excel)",
+  "beschreibung": "Reiner VBA-Dekoder für Excel-Arbeitsmappen: Scan-Text (Handscanner/Link) → TEebBogen. Nur Lesen, kein Encoder.",
+  "schemaVersion": 10,
+  "schemaKonstante": {
+    "datei": "m_digitalerEEBParsing.bas",
+    "muster": "Private Const SCHEMA_MAX As Long = (\\d+)"
+  },
+  "liest": {
+    "schemaVon": 2,
+    "base41": true,
+    "base64url": true,
+    "vorlagenMarker": true,
+    "segmente": true,
+    "signaturContainer": "wird übersprungen, Signatur NICHT geprüft"
+  },
+  "vokabular": {
+    "quelle": "bos-vokabulare",
+    "stand": "2f94a46",
+    "generator": "erfassungsbogen: npm run vokabular:excel-vba"
+  },
+  "testvektoren": "manuell (kein Headless-VBA): ports/testvektoren/testvektoren.json in der Mappe abarbeiten, siehe README.md"
+}
