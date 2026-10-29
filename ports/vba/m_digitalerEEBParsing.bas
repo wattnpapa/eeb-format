@@ -11,14 +11,15 @@ Attribute VB_Name = "m_digitalerEEBParsing"
 '     Bytes         ->  Magic "EEB2" bzw. "EEB2C" (Signaturkette wird
 '                       übersprungen, NICHT geprüft)
 '     Rest          ->  Deflate (raw, RFC 1951) entpacken
-'     Binärstrom    ->  Felder des Bogens (Schema 2..10)
+'     Binärstrom    ->  Felder des Bogens (Schema 2..11)
 '
-'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 10 werden gelesen,
+'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 11 werden gelesen,
 '  Felder jüngerer Versionen bleiben bei älteren Codes leer/0 (wie
 '  decodeBinaer in vendor/eeb-format/src/codec.ts). Neu je Version:
 '     3  Ernährung je Person        7  Stand minutengenau
 '     6  Übungs-Flag                8  weitere Fahrerlaubnisklassen
 '     9  Sitzplätze je Fahrzeug    10  abweichende Dienststelle je Person
+'    11  Zeitraum von/bis mit Uhrzeit und Zeitzonen-Offset (ISO 8601)
 '
 '  Einstiegspunkte für EINEN vollständigen Code:
 '     EebBogenLesen         (Text -> TEebBogen, wirft bei Fehlern)
@@ -56,7 +57,7 @@ Option Explicit
 
 Private Const B41_ALPHABET As String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*-/:"
 Private Const EEB_EPOCHE As Date = #1/1/2020#
-Private Const SCHEMA_MAX As Long = 10
+Private Const SCHEMA_MAX As Long = 11
 ' Obergrenze der Signaturstufen im Container (wie MAX_STUFEN in der App).
 Private Const MAX_STUFEN As Long = 32
 ' Ein Beruf steht als Freitext mit diesem Präfix in den Zusatzqualifikationen
@@ -102,8 +103,10 @@ Public Type TEebBogen
     hierarchie As String
     standortRef As Long           ' THW-OV-Nummer, 0 = keine
     ortAuftrag As String
-    zeitraumVon As Date
+    zeitraumVon As Date           ' ab Schema 11 ggf. mit Uhrzeit (lokale Wandzeit, ohne Offset)
     zeitraumBis As Date
+    zeitraumVonIso As String      ' ab Schema 11: "2026-10-29T08:00:00+01:00", "" = nur der Tag
+    zeitraumBisIso As String
     einsatzbeginn As Date         ' 0 = nicht angegeben
     einsatzende As Date
     personalErfassung As Long     ' 0=vollständig 1=nur Stärke
@@ -203,8 +206,8 @@ Private Function BogenAlsTextFormatieren(ByRef b As TEebBogen) As String
     s = s & "Einheit: " & EebOrgName(b.organisation, b.organisationName) & " " & _
         b.einheitsTyp & " " & b.einheitOrt & vbLf
     s = s & "Auftrag: " & b.ortAuftrag & vbLf
-    s = s & "Zeitraum: " & Format$(b.zeitraumVon, "dd.mm.yyyy") & " - " & _
-        Format$(b.zeitraumBis, "dd.mm.yyyy") & vbLf
+    s = s & "Zeitraum: " & Format$(b.zeitraumVon, IIf(Len(b.zeitraumVonIso) > 0, "dd.mm.yyyy hh:nn", "dd.mm.yyyy")) & " - " & _
+        Format$(b.zeitraumBis, IIf(Len(b.zeitraumBisIso) > 0, "dd.mm.yyyy hh:nn", "dd.mm.yyyy")) & vbLf
     s = s & "Stärke: " & b.staerkeFuehrer & "/" & b.staerkeUnterfuehrer & "/" & _
         b.staerkeMannschaft & "//" & b.staerkeGesamt & vbLf
     For i = 1 To b.personalAnzahl
@@ -1101,7 +1104,34 @@ Private Sub EinsatzLesen(ByRef b As TEebBogen)
     b.ortAuftrag = LiesString()
     If (flags And 1) <> 0 Then b.einsatzbeginn = EEB_EPOCHE + LiesU32() / 1440#
     If (flags And 2) <> 0 Then b.einsatzende = EEB_EPOCHE + LiesU32() / 1440#
+    ' Zeitraum mit Uhrzeit, ab Schema 11 (Flags 4/8): Minute des Tages (uint16)
+    ' + Offset in Viertelstunden (uint8, +128). Die Wandzeit wird zusätzlich auf
+    ' zeitraumVon/zeitraumBis aufgeschlagen, damit Zellen sie direkt zeigen.
+    b.zeitraumVonIso = ""
+    b.zeitraumBisIso = ""
+    Dim minuten As Long, offset As Long
+    If (flags And 4) <> 0 Then
+        minuten = LiesU16()
+        offset = (LiesU8() - 128) * 15
+        b.zeitraumVonIso = ZeitraumIso(b.zeitraumVon, minuten, offset)
+        b.zeitraumVon = b.zeitraumVon + minuten / 1440#
+    End If
+    If (flags And 8) <> 0 Then
+        minuten = LiesU16()
+        offset = (LiesU8() - 128) * 15
+        b.zeitraumBisIso = ZeitraumIso(b.zeitraumBis, minuten, offset)
+        b.zeitraumBis = b.zeitraumBis + minuten / 1440#
+    End If
 End Sub
+
+' Tag + Minuten + Offset -> "2026-10-29T08:00:00+01:00" (wie zeitraumIso in src/model.ts).
+Private Function ZeitraumIso(ByVal tag As Date, ByVal minuten As Long, ByVal offset As Long) As String
+    Dim vz As String
+    vz = IIf(offset < 0, "-", "+")
+    offset = Abs(offset)
+    ZeitraumIso = Format$(tag, "yyyy-mm-dd") & "T" & Format$(minuten \ 60, "00") & ":" & _
+        Format$(minuten Mod 60, "00") & ":00" & vz & Format$(offset \ 60, "00") & ":" & Format$(offset Mod 60, "00")
+End Function
 
 Private Function PersonLesen(ByVal v As Long, ByVal organisation As Long) As TEebPerson
     Dim p As TEebPerson, flags As Long, anzahl As Long, i As Long, s As String

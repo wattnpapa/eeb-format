@@ -159,6 +159,31 @@ describe("Binär-Roundtrip (encodeBinaer/decodeBinaer)", () => {
     expect(decodeBinaer(encodeBinaer(leer)).personal[0]!.dienststelle).toBeUndefined();
   });
 
+  it("eine Uhrzeit zum Zeitraum fordert Schema 11 und übersteht den Roundtrip", () => {
+    const b = basisBogen();
+    // MESZ am Beginn, MEZ am Ende: der Offset reist je Ende mit.
+    b.einsatz = { ...b.einsatz, zeitraumVonIso: "2025-05-14T08:00:00+02:00", zeitraumBisIso: "2025-05-17T18:00:00+01:00" };
+    expect(encodeBinaer(b)[0]).toBe(11);
+    gleich(decodeBinaer(encodeBinaer(b)), b);
+    // Nur „bis" gesetzt, negativer Offset mit halber Stunde: „von" bleibt leer, nichts verrutscht.
+    const nurBis = basisBogen();
+    nurBis.einsatz = { ...nurBis.einsatz, zeitraumBisIso: "2025-05-17T00:00:00-03:30" };
+    const zurueck = decodeBinaer(encodeBinaer(nurBis));
+    expect(zurueck.einsatz.zeitraumVonIso).toBeUndefined();
+    expect(zurueck.einsatz.zeitraumBisIso).toBe("2025-05-17T00:00:00-03:30");
+    gleich(zurueck, nurBis);
+  });
+
+  it("schreibt den Zeitraum minutengenau mit Offset; „Z“ wird +00:00, Unlesbares wirft", () => {
+    const b = basisBogen();
+    b.einsatz = { ...b.einsatz, zeitraumVonIso: "2025-05-14T08:15:42.5Z" };
+    expect(decodeBinaer(encodeBinaer(b)).einsatz.zeitraumVonIso).toBe("2025-05-14T08:15:00+00:00");
+    b.einsatz = { ...b.einsatz, zeitraumVonIso: "2025-05-14 08:00" };
+    expect(() => encodeBinaer(b)).toThrow(/ISO-8601/);
+    b.einsatz = { ...b.einsatz, zeitraumVonIso: "2025-05-14T08:00:00+01:07" };
+    expect(() => encodeBinaer(b)).toThrow(/ISO-8601/);
+  });
+
   it("erhält die Uhrzeit im Stand über den Roundtrip", () => {
     expect(decodeBinaer(encodeBinaer(basisBogen())).stand).toBe(zeitpunktAusIso("2026-05-14T10:39"));
   });

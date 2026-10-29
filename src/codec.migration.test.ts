@@ -149,3 +149,37 @@ describe("Abwärtskompatibilität: v9-QR-Code ohne Dienststelle je Person", () =
     expect(bogen.sofortbedarf).toMatchObject({ verpflegungPersonen: 2, dieselLiter: 50, ruhezeitErforderlich: true });
   });
 });
+
+/**
+ * EINGEFRORENE v10-Fixture (der Testvektor „voll-schema-10“, erzeugt mit dem
+ * Schema-10-Encoder vor der Einführung der Uhrzeit zum Zeitraum in Schema 11).
+ * Sie belegt, dass v10-Bögen mit Einsatzbeginn und -ende weiter gelesen werden
+ * und dort keine Uhrzeit zum Zeitraum auftaucht.
+ *
+ * Inhalt (v10): THW OV Oldenburg, Deichverteidigung Elsfleth 27.–29.10.2026,
+ * Beginn 27.10. 10:00, Ende 29.10. 18:00, 2 Personen, 3 Fahrzeuge.
+ */
+const V10_QR_URL =
+  "https://erfassungsbogen.app/#B.LMAD3ABXB80Y764T63JQVOYG$UGQCK5K2TW1UPG0X2AWMDXSJTO8$FLYJLDXQUUM2$C*QXVF1FRE-KGPY:73230UBLT-XAAR09YZNMMNAHJJ8Y4KTQJ6I100YN76VR6UA/HKZTGYWHTFYQLT73ZUX8TSM-/ZF-WAHJVKHW$00ZOX6-OLX:-G0-VA2I*F4XCVK4G9PPSLELQ41I9NY7GJ$N8174DSI27OY26MAGJO/6L/AK35O06TM70QPQ6*TAMJ7SFS7LPLAVRPKPZ4L3N06E5T6IIPRAO5908PA$H326V1OU$AO3PFU/PUCOCSKI4NXVY47HNF89-5BU-AQXHH0EA:*XRWPF52ENDPHMFAP3B927JKXHWZR10PKB9DZ7S$55ED:UZ*1335NYW7BE3TOLSL-SY7:$20SCGY4TKMJ09ZY:W-$2MQQZR-3:TS*K6P9JN-8H:0ERR0M0G1I1A-GBH-S07F-H0ZK484XF3ZG2BA8WNKZ91P6EQAXRXNQWOTDQM5N5M5X67BX1VQLLW-MW*LOL0NPD4K8AOKZ";
+
+describe("Abwärtskompatibilität: v10-QR-Code ohne Uhrzeit zum Zeitraum", () => {
+  const bogen = decodePayloadUrl(V10_QR_URL, kompressor);
+
+  it("wird auf die aktuelle Schema-Version gehoben", () => {
+    expect(bogen.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("liest den Einsatz ohne Uhrzeit zum Zeitraum", () => {
+    expect(bogen.einsatz.ortAuftrag).toBe("Deichverteidigung Elsfleth");
+    expect(bogen.einsatz.zeitraumVonIso).toBeUndefined();
+    expect(bogen.einsatz.zeitraumBisIso).toBeUndefined();
+    expect(bogen.einsatz.einsatzbeginn).toBeDefined();
+    expect(bogen.einsatz.einsatzende).toBeDefined();
+  });
+
+  it("liest die Felder hinter dem Einsatz weiter richtig", () => {
+    expect(bogen.personal.map((p) => p.nachname)).toEqual(["Müller", "Schulz"]);
+    expect(bogen.personal[0]!.dienststelle).toBe("OV Delmenhorst");
+    expect(bogen.fahrzeuge[0]!.sitzplaetze).toBe(7);
+  });
+});

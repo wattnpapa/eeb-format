@@ -18,6 +18,8 @@ import {
   transportSchemaVersion,
   unterbringungMWD,
   verpflegung,
+  zeitraumIso,
+  zeitraumIsoLesen,
   zeitpunktAusIso,
   zeitpunktZuIso,
   type Erfassungsbogen,
@@ -189,8 +191,8 @@ describe("ansprechpartner()", () => {
 });
 
 describe("Konstanten", () => {
-  it("SCHEMA_VERSION ist die aktuelle Version 10", () => {
-    expect(SCHEMA_VERSION).toBe(10);
+  it("SCHEMA_VERSION ist die aktuelle Version 11", () => {
+    expect(SCHEMA_VERSION).toBe(11);
     // Sanity: der Meldekopf-Modus ist als eigener Enum-Wert vorhanden.
     expect(PersonalErfassung.NUR_STAERKE).toBe(1);
   });
@@ -224,6 +226,24 @@ describe("Konstanten", () => {
     expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "Nienburg" }] })).toBe(10);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "" }] })).toBe(5);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [{ ...person(), dienststelle: "Nienburg" }], fahrzeuge: [fz(7)] })).toBe(10);
+    // Eine Uhrzeit zum Zeitraum fordert Schema 11 — auch Mitternacht (0) zählt als gesetzt.
+    const ez = (p: { zeitraumVonIso?: string; zeitraumBisIso?: string }) => ({ zeitraumVon: 1, zeitraumBis: 1, ortAuftrag: "", ...p });
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({}) })).toBe(5);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({ zeitraumVonIso: "2020-01-02T08:00:00+01:00" }) })).toBe(11);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({ zeitraumBisIso: "2020-01-02T00:00:00Z" }) })).toBe(11);
+  });
+
+  it("zeitraumIso / zeitraumIsoLesen: ISO 8601 mit Offset hin und zurück", () => {
+    const tag = datumAusIso("2026-10-29");
+    expect(zeitraumIso({ tag, minuten: 480, offsetMinuten: 60 })).toBe("2026-10-29T08:00:00+01:00");
+    expect(zeitraumIso({ tag, minuten: 1439, offsetMinuten: -330 })).toBe("2026-10-29T23:59:00-05:30");
+    expect(zeitraumIsoLesen("2026-10-29T08:00:00+01:00")).toEqual({ tag, minuten: 480, offsetMinuten: 60 });
+    expect(zeitraumIsoLesen("2026-10-29T18:00+02:00")).toEqual({ tag, minuten: 1080, offsetMinuten: 120 });
+    expect(zeitraumIsoLesen("2026-10-29T18:00:00Z")).toEqual({ tag, minuten: 1080, offsetMinuten: 0 });
+    // Ohne Offset ist es kein Zeitpunkt im Sinne des Schemas.
+    expect(zeitraumIsoLesen("2026-10-29T08:00:00")).toBeUndefined();
+    expect(zeitraumIsoLesen("2026-10-29T24:00:00+01:00")).toBeUndefined();
+    expect(zeitraumIsoLesen("")).toBeUndefined();
   });
 
   it("alleFahrerlaubnisse: Haupt- und weitere Klassen, ohne NONE und Dubletten", () => {

@@ -71,6 +71,8 @@ const voll = {
     ortAuftrag: "Deichverteidigung Elsfleth",
     einsatzbeginn: minute("2026-10-27", 10, 0),
     einsatzende: minute("2026-10-29", 18, 0),
+    zeitraumVonIso: "2026-10-27T08:00:00+01:00",
+    zeitraumBisIso: "2026-10-29T18:00:00+01:00",
   },
   personalErfassung: 0,
   unterbringungManuell: { m: 1, w: 1, d: 0 },
@@ -101,7 +103,7 @@ const voll = {
     { typ: { freitext: "Privat-Pkw" } },
   ],
   sofortbedarf: { verpflegungPersonen: 2, dieselLiter: 120, benzinLiter: 0, gemischLiter: 5, unterbringung: true, ruhezeitErforderlich: true },
-  sonstiges: "Testbogen Schema 10 für die Portierungen",
+  sonstiges: "Testbogen Schema 11 für die Portierungen",
 };
 
 /** Schema 5: nichts, was eine höhere Version fordert — so schreibt der Encoder noch heute Altcodes. */
@@ -138,6 +140,12 @@ const ALTCODES: Array<{ name: string; schema: number; url: string; hinweis: stri
     schema: 9,
     hinweis: "Sitzplatzzahl am Fahrzeug, noch ohne Dienststelle je Person — hinter dem Fahrerlaubnis-Zähler folgt direkt die Funktionsliste.",
     url: "https://erfassungsbogen.app/#B.LMAD3A/RYY-HAPM/4M/RNP6MH8MDP9DR5OA7$HRB8E-ED2A7K5U83YTUM-C5SL59BJ1L-2JLD:TCMYH751-L-WUG-0S92$I-G/T1VS*2F6KOASM9YNBEL6-L:0$4Y6BDL13A6C0PEL8W6JKIP/K0FY-8BWOAIDL9Y1E*1HQ1ZVNXS4*DS4*58:M:0$APB9Y1YNB00",
+  },
+  {
+    name: "alt-schema-10",
+    schema: 10,
+    hinweis: "Einsatzbeginn und -ende gesetzt, noch ohne Uhrzeit zum Zeitraum (Einsatz-Flags 4/8 ab Schema 11). Ehemals Vektor voll-schema-10.",
+    url: "https://erfassungsbogen.app/#B.LMAD3ABXB80Y764T63JQVOYG$UGQCK5K2TW1UPG0X2AWMDXSJTO8$FLYJLDXQUUM2$C*QXVF1FRE-KGPY:73230UBLT-XAAR09YZNMMNAHJJ8Y4KTQJ6I100YN76VR6UA/HKZTGYWHTFYQLT73ZUX8TSM-/ZF-WAHJVKHW$00ZOX6-OLX:-G0-VA2I*F4XCVK4G9PPSLELQ41I9NY7GJ$N8174DSI27OY26MAGJO/6L/AK35O06TM70QPQ6*TAMJ7SFS7LPLAVRPKPZ4L3N06E5T6IIPRAO5908PA$H326V1OU$AO3PFU/PUCOCSKI4NXVY47HNF89-5BU-AQXHH0EA:*XRWPF52ENDPHMFAP3B927JKXHWZR10PKB9DZ7S$55ED:UZ*1335NYW7BE3TOLSL-SY7:$20SCGY4TKMJ09ZY:W-$2MQQZR-3:TS*K6P9JN-8H:0ERR0M0G1I1A-GBH-S07F-H0ZK484XF3ZG2BA8WNKZ91P6EQAXRXNQWOTDQM5N5M5X67BX1VQLLW-MW*LOL0NPD4K8AOKZ",
   },
 ];
 
@@ -179,7 +187,7 @@ function erzeugen(): string {
   const vektoren = [
     vektorAusBogen("minimal", minimal, 0, "Nur Pflichtfelder, manuelle Stärke, Feuerwehr mit Freitext-Einheitstyp."),
     vektorAusBogen("schema-5", schema5, 0, "Inhalt fordert nur Schema 5 — der heutige Encoder schreibt dann auch Schema 5 (transportSchemaVersion)."),
-    vektorAusBogen("voll-schema-10", voll, 3, "Jedes Feld bis Schema 10 belegt: Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
+    vektorAusBogen("voll-schema-11", voll, 3, "Jedes Feld bis Schema 11 belegt: Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
     ...ALTCODES.map((a) => {
       const erwartet = codec.decodePayloadUrl(a.url, nodeKompressor);
       const payload: Uint8Array = codec.datenDekodieren(codec.fragmentInhalt(a.url));

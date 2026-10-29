@@ -26,7 +26,7 @@ import type {
   Sofortbedarf,
   VokabularWert,
 } from "./model.js";
-import { Ernaehrung, KontaktArt, MINUTEN_JE_TAG, SCHEMA_VERSION, transportSchemaVersion } from "./model.js";
+import { Ernaehrung, KontaktArt, MINUTEN_JE_TAG, SCHEMA_VERSION, transportSchemaVersion, zeitraumIso, zeitraumIsoLesen } from "./model.js";
 
 export const EEB_MAGIC = new Uint8Array([0x45, 0x45, 0x42, 0x32]); // "EEB2"
 
@@ -247,12 +247,28 @@ function encodeEinheit(w: Writer, e: Einheit): void {
 }
 
 function encodeEinsatz(w: Writer, ez: Einsatz): void {
-  w.u8((ez.einsatzbeginn != null ? 1 : 0) | (ez.einsatzende != null ? 2 : 0));
+  w.u8(
+    (ez.einsatzbeginn != null ? 1 : 0) |
+    (ez.einsatzende != null ? 2 : 0) |
+    (ez.zeitraumVonIso != null ? 4 : 0) |
+    (ez.zeitraumBisIso != null ? 8 : 0),
+  );
   w.u16(ez.zeitraumVon);
   w.u16(ez.zeitraumBis);
   w.str(ez.ortAuftrag);
   if (ez.einsatzbeginn != null) w.u32(ez.einsatzbeginn);
   if (ez.einsatzende != null) w.u32(ez.einsatzende);
+  // Ab Schema 11: Uhrzeit zum Zeitraum (transportSchemaVersion hebt auf 11).
+  // Den Tag trägt zeitraumVon/zeitraumBis; hier nur Wandzeit und Offset.
+  if (ez.zeitraumVonIso != null) encodeZeitraumZeit(w, ez.zeitraumVonIso);
+  if (ez.zeitraumBisIso != null) encodeZeitraumZeit(w, ez.zeitraumBisIso);
+}
+
+function encodeZeitraumZeit(w: Writer, iso: string): void {
+  const z = zeitraumIsoLesen(iso);
+  if (!z || z.offsetMinuten % 15 !== 0) throw new Error(`EEB2: Zeitraum „${iso}" ist kein ISO-8601-Zeitpunkt mit Offset`);
+  w.u16(z.minuten);
+  w.u8(z.offsetMinuten / 15 + 128);
 }
 
 function encodeSofortbedarf(w: Writer, s: Sofortbedarf): void {
@@ -416,6 +432,9 @@ function decodeEinsatz(r: Reader): Einsatz {
   const ez: Einsatz = { zeitraumVon: r.u16(), zeitraumBis: r.u16(), ortAuftrag: r.str() };
   if (flags & 1) ez.einsatzbeginn = r.u32();
   if (flags & 2) ez.einsatzende = r.u32();
+  // Ab Schema 11: Wandzeit (uint16) + Offset in Viertelstunden (uint8, +128).
+  if (flags & 4) ez.zeitraumVonIso = zeitraumIso({ tag: ez.zeitraumVon, minuten: r.u16(), offsetMinuten: (r.u8() - 128) * 15 });
+  if (flags & 8) ez.zeitraumBisIso = zeitraumIso({ tag: ez.zeitraumBis, minuten: r.u16(), offsetMinuten: (r.u8() - 128) * 15 });
   return ez;
 }
 

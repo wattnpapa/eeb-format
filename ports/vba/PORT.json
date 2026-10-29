@@ -1,7 +1,7 @@
 {
   "sprache": "VBA (Excel)",
   "beschreibung": "Reiner VBA-Dekoder für Excel-Arbeitsmappen: Scan-Text (Handscanner/Link) → TEebBogen. Nur Lesen, kein Encoder.",
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "schemaKonstante": {
     "datei": "m_digitalerEEBParsing.bas",
     "muster": "Private Const SCHEMA_MAX As Long = (\\d+)"

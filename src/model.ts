@@ -9,7 +9,7 @@
  * React Native / Capacitor und Node.
  */
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 /**
  * Schema-Version, die ein Transport (QR, JSON) für diesen Bogen fordern muss.
@@ -20,10 +20,13 @@ export const SCHEMA_VERSION = 10;
  * Ein Stand mit Uhrzeit (Minuten ≠ Mitternacht) ist erst ab Schema 7 kodierbar.
  * Eine Person mit mehr als einer Fahrerlaubnisklasse (B + A) erst ab Schema 8.
  * Eine abweichende Sitzplatzzahl an einem Fahrzeug erst ab Schema 9.
+ * Eine abweichende Dienststelle je Person erst ab Schema 10.
+ * Eine Uhrzeit zum Zeitraum (von/bis) erst ab Schema 11.
  */
 export function transportSchemaVersion(
-  b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge">>,
+  b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge" | "einsatz">>,
 ): number {
+  if (b.einsatz?.zeitraumVonIso != null || b.einsatz?.zeitraumBisIso != null) return 11;
   if (b.personal.some((p) => p.dienststelle)) return 10;
   if (b.fahrzeuge?.some((f) => f.sitzplaetze != null)) return 9;
   if (b.personal.some((p) => p.weitereFahrerlaubnisse?.length)) return 8;
@@ -86,6 +89,39 @@ export function zeitpunktAusIso(iso: string): EebZeitpunkt {
 
 export function zeitpunktZuIso(zeitpunkt: EebZeitpunkt): string {
   return new Date(EEB_EPOCHE_MS + zeitpunkt * 60_000).toISOString().slice(0, 16);
+}
+
+/** Teile eines Zeitraum-Endes mit Uhrzeit (Schema 11). */
+export interface ZeitraumZeit {
+  tag: EebDatum;
+  /** Minuten seit Mitternacht in lokaler Wandzeit, 0–1439. */
+  minuten: number;
+  /** Abstand der lokalen Wandzeit zu UTC in Minuten (MEZ: 60, MESZ: 120). Vielfaches von 15. */
+  offsetMinuten: number;
+}
+
+/** Tag + Wandzeit + Offset → "2026-10-29T08:00:00+01:00" (ISO 8601 / RFC 3339). */
+export function zeitraumIso(z: ZeitraumZeit): string {
+  const zwei = (n: number) => String(n).padStart(2, "0");
+  const o = Math.abs(z.offsetMinuten);
+  const vz = z.offsetMinuten < 0 ? "-" : "+";
+  return `${datumZuIso(z.tag)}T${zwei(Math.floor(z.minuten / 60))}:${zwei(z.minuten % 60)}:00${vz}${zwei(Math.floor(o / 60))}:${zwei(o % 60)}`;
+}
+
+/**
+ * "2026-10-29T08:00:00+01:00" → Tag, Wandzeit, Offset. Sekunden und Bruchteile
+ * werden verworfen (minutengenau wie alle Zeitpunkte), "Z" gilt als +00:00.
+ * Liefert undefined für alles, was kein ISO-8601-Zeitpunkt mit Offset ist.
+ */
+export function zeitraumIsoLesen(iso: string): ZeitraumZeit | undefined {
+  const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|([+-])(\d{2}):(\d{2}))$/.exec(iso);
+  if (!m) return undefined;
+  const h = Number(m[2]);
+  const min = Number(m[3]);
+  if (h > 23 || min > 59) return undefined;
+  const offsetMinuten = m[4] === "Z" ? 0 : (m[5] === "-" ? -1 : 1) * (Number(m[6]) * 60 + Number(m[7]));
+  if (Math.abs(offsetMinuten) > 18 * 60) return undefined;
+  return { tag: datumAusIso(m[1]!), minuten: h * 60 + min, offsetMinuten };
 }
 
 // ------------------------------------------------------------------- Vokabulare
@@ -285,6 +321,17 @@ export interface Einheit {
 export interface Einsatz {
   zeitraumVon: EebDatum; // "vorgesehener Einsatzzeitraum"
   zeitraumBis: EebDatum;
+  /**
+   * Beginn bzw. Ende des Zeitraums mit Uhrzeit als ISO 8601 mit Zeitzonen-Offset
+   * (Form nach RFC 3339: "2026-10-29T08:00:00+01:00"). Ab Schema 11; fehlt = nur
+   * der Tag ist gemeldet (alle älteren Bögen). Der Tag steht weiter in
+   * zeitraumVon/zeitraumBis, damit die Tageslogik („Zeitraum vorbei") und ältere
+   * Leser unverändert bleiben — er ist auch für den Datumsteil maßgeblich.
+   * Im QR: Minute des Tages (uint16) + Offset in Viertelstunden (uint8, +128),
+   * siehe zeitraumIso/zeitraumIsoLesen.
+   */
+  zeitraumVonIso?: string;
+  zeitraumBisIso?: string;
   ortAuftrag: string; // "Fernmeldebauübung Kabelblitz"
   einsatzbeginn?: EebZeitpunkt; // oft erst vor Ort/am Meldekopf gefüllt
   einsatzende?: EebZeitpunkt;
