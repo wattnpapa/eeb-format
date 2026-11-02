@@ -165,7 +165,8 @@ function encodeKontakt(w: Writer, k: Kontakt): void {
   const istTemplate = k.art === KontaktArt.EMAIL && k.emailTemplate != null;
   w.u8(k.art | (k.dienstlich ? 4 : 0) | (istTemplate ? 8 : 0));
   if (istTemplate) w.u8(k.emailTemplate!);
-  else if (k.art === KontaktArt.EMAIL) w.str(k.wert ?? "");
+  // E-Mail und Funkrufname (ab Schema 12) als String, Rufnummern BCD-gepackt.
+  else if (k.art === KontaktArt.EMAIL || k.art === KontaktArt.FUNK) w.str(k.wert ?? "");
   else w.bcd(k.wert ?? "");
 }
 
@@ -334,7 +335,8 @@ function decodeKontakt(r: Reader): Kontakt {
   const art: KontaktArt = flags & 3;
   const k: Kontakt = { art, dienstlich: (flags & 4) !== 0 };
   if (flags & 8) k.emailTemplate = r.u8();
-  else if (art === KontaktArt.EMAIL) k.wert = r.str();
+  // Art 3 (Funkrufname) kommt erst ab Schema 12 vor; ältere Ströme tragen sie nie.
+  else if (art === KontaktArt.EMAIL || art === KontaktArt.FUNK) k.wert = r.str();
   else k.wert = r.bcd();
   return k;
 }

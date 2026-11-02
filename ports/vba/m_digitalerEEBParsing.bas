@@ -11,15 +11,16 @@ Attribute VB_Name = "m_digitalerEEBParsing"
 '     Bytes         ->  Magic "EEB2" bzw. "EEB2C" (Signaturkette wird
 '                       übersprungen, NICHT geprüft)
 '     Rest          ->  Deflate (raw, RFC 1951) entpacken
-'     Binärstrom    ->  Felder des Bogens (Schema 2..11)
+'     Binärstrom    ->  Felder des Bogens (Schema 2..12)
 '
-'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 11 werden gelesen,
+'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 12 werden gelesen,
 '  Felder jüngerer Versionen bleiben bei älteren Codes leer/0 (wie
 '  decodeBinaer in vendor/eeb-format/src/codec.ts). Neu je Version:
 '     3  Ernährung je Person        7  Stand minutengenau
 '     6  Übungs-Flag                8  weitere Fahrerlaubnisklassen
 '     9  Sitzplätze je Fahrzeug    10  abweichende Dienststelle je Person
 '    11  Zeitraum von/bis mit Uhrzeit und Zeitzonen-Offset (ISO 8601)
+'    12  Funkrufname als Erreichbarkeit einer Person (Kontaktart 3)
 '
 '  Einstiegspunkte für EINEN vollständigen Code:
 '     EebBogenLesen         (Text -> TEebBogen, wirft bei Fehlern)
@@ -57,7 +58,7 @@ Option Explicit
 
 Private Const B41_ALPHABET As String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*-/:"
 Private Const EEB_EPOCHE As Date = #1/1/2020#
-Private Const SCHEMA_MAX As Long = 11
+Private Const SCHEMA_MAX As Long = 12
 ' Obergrenze der Signaturstufen im Container (wie MAX_STUFEN in der App).
 Private Const MAX_STUFEN As Long = 32
 ' Ein Beruf steht als Freitext mit diesem Präfix in den Zusatzqualifikationen
@@ -1188,17 +1189,23 @@ Private Function KontaktLesen() As String
     If (flags And 8) <> 0 Then
         Call LiesU8                                   ' altes E-Mail-Template
         wert = "(Standardadresse)"
-    ElseIf art = 2 Then
-        wert = LiesString()
+    ElseIf art = 2 Or art = 3 Then
+        wert = LiesString()                           ' E-Mail; Funkrufname ab Schema 12
     Else
         wert = LiesBcd()
     End If
     Select Case art
         Case 0: artText = "Mobil"
         Case 1: artText = "Festnetz"
+        Case 3: artText = "Funk"
         Case Else: artText = "E-Mail"
     End Select
-    KontaktLesen = artText & ": " & wert & " (" & IIf((flags And 4) <> 0, "D", "P") & ")"
+    ' Ein Funkrufname ist nie privat - ohne (D)/(P), wie in App und PDF.
+    If art = 3 Then
+        KontaktLesen = artText & ": " & wert
+    Else
+        KontaktLesen = artText & ": " & wert & " (" & IIf((flags And 4) <> 0, "D", "P") & ")"
+    End If
 End Function
 
 Private Function FahrzeugLesen(ByVal organisation As Long, ByVal einheitOrt As String) As TEebFahrzeug

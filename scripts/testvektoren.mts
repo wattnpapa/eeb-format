@@ -52,7 +52,7 @@ const minimal = {
   fahrzeuge: [],
 };
 
-/** Voller Bogen: nutzt jedes Feld bis einschließlich Schema 10. */
+/** Voller Bogen: nutzt jedes Feld bis einschließlich Schema 12. */
 const voll = {
   schemaVersion: SCHEMA_VERSION,
   stand: minute("2026-10-27", 8, 30),
@@ -85,6 +85,7 @@ const voll = {
       kontakte: [
         { art: 0, dienstlich: true, wert: "01701234567" },
         { art: 2, dienstlich: false, wert: "anna.mueller@example.org" },
+        { art: 3, dienstlich: true, wert: "Heros Oldenburg 22/51-1" },
       ],
       zusatzqualifikationen: [{ code: 32 }, { freitext: "Beruf: Elektroniker/in" }, { freitext: "Beruf: Krankenpfleger/in" }],
     },
@@ -103,7 +104,7 @@ const voll = {
     { typ: { freitext: "Privat-Pkw" } },
   ],
   sofortbedarf: { verpflegungPersonen: 2, dieselLiter: 120, benzinLiter: 0, gemischLiter: 5, unterbringung: true, ruhezeitErforderlich: true },
-  sonstiges: "Testbogen Schema 11 für die Portierungen",
+  sonstiges: "Testbogen Schema 12 für die Portierungen",
 };
 
 /** Schema 5: nichts, was eine höhere Version fordert — so schreibt der Encoder noch heute Altcodes. */
@@ -147,6 +148,12 @@ const ALTCODES: Array<{ name: string; schema: number; url: string; hinweis: stri
     hinweis: "Einsatzbeginn und -ende gesetzt, noch ohne Uhrzeit zum Zeitraum (Einsatz-Flags 4/8 ab Schema 11). Ehemals Vektor voll-schema-10.",
     url: "https://erfassungsbogen.app/#B.LMAD3ABXB80Y764T63JQVOYG$UGQCK5K2TW1UPG0X2AWMDXSJTO8$FLYJLDXQUUM2$C*QXVF1FRE-KGPY:73230UBLT-XAAR09YZNMMNAHJJ8Y4KTQJ6I100YN76VR6UA/HKZTGYWHTFYQLT73ZUX8TSM-/ZF-WAHJVKHW$00ZOX6-OLX:-G0-VA2I*F4XCVK4G9PPSLELQ41I9NY7GJ$N8174DSI27OY26MAGJO/6L/AK35O06TM70QPQ6*TAMJ7SFS7LPLAVRPKPZ4L3N06E5T6IIPRAO5908PA$H326V1OU$AO3PFU/PUCOCSKI4NXVY47HNF89-5BU-AQXHH0EA:*XRWPF52ENDPHMFAP3B927JKXHWZR10PKB9DZ7S$55ED:UZ*1335NYW7BE3TOLSL-SY7:$20SCGY4TKMJ09ZY:W-$2MQQZR-3:TS*K6P9JN-8H:0ERR0M0G1I1A-GBH-S07F-H0ZK484XF3ZG2BA8WNKZ91P6EQAXRXNQWOTDQM5N5M5X67BX1VQLLW-MW*LOL0NPD4K8AOKZ",
   },
+  {
+    name: "alt-schema-11",
+    schema: 11,
+    hinweis: "Zeitraum mit Uhrzeit, Kontakte nur Mobil/Festnetz/E-Mail — noch ohne Funkrufname als Erreichbarkeit (Kontaktart 3 ab Schema 12). Ehemals Vektor voll-schema-11.",
+    url: "https://erfassungsbogen.app/#B.LMAD3ABXB3OVP-2T634QVQW7I*N443U96OE2V$R2AMX$D9UZ4B6:91QJ12JA0J8J*7MIE:IVZFYC0ON6SVFPZ05Q40NEK$PNR1JVU$OO5ZWOH4YVSKJ-Z3ESENJCT33$DS4F3*AN581:80:FE*FDYSV47E*YP:834IWSNKF4XO0NRVOGZOIH5791CAC8XFGHDI8CCPW-OD5JXHIY4I63FZBO$A25:R-*3JK8IAKJ70UN4YPZ8F-BYUVUYW4A*CUNEUX$H*/SD5R1WWFVACQH0INUGW::LKX9DP5UTLUD8AYYG*52$S/HTCGTPIEHXOU*WO3XIR1N/BNUNNOR/S*Y31PUU/IU:RLEZ--IJELN10PX2*RD$3EZMOZHNAXA4-R8450WW29N6V3J$B1KF-$AA/NU5$H34NB76/$O7Q871JP:Q92$PZ80W2VA$--SQ5MYEJV1KKH88*Y70Y/MP3:43DD*ETDWGMLSOB4P3KSL-*KHDR0UYIVYGABAVAMU0A1P6EQAV$YNQWP4DQM5N5M5X64WZ72DAHE0KN3$CXCM1BANJUUL-",
+  },
 ];
 
 // ------------------------------------------------------------- Erzeugung
@@ -187,7 +194,7 @@ function erzeugen(): string {
   const vektoren = [
     vektorAusBogen("minimal", minimal, 0, "Nur Pflichtfelder, manuelle Stärke, Feuerwehr mit Freitext-Einheitstyp."),
     vektorAusBogen("schema-5", schema5, 0, "Inhalt fordert nur Schema 5 — der heutige Encoder schreibt dann auch Schema 5 (transportSchemaVersion)."),
-    vektorAusBogen("voll-schema-11", voll, 3, "Jedes Feld bis Schema 11 belegt: Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
+    vektorAusBogen("voll-schema-12", voll, 3, "Jedes Feld bis Schema 12 belegt: Funkrufname als Erreichbarkeit einer Person (Kontaktart 3, Freitext), Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen der Fahrzeuge, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
     ...ALTCODES.map((a) => {
       const erwartet = codec.decodePayloadUrl(a.url, nodeKompressor);
       const payload: Uint8Array = codec.datenDekodieren(codec.fragmentInhalt(a.url));

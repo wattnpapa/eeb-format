@@ -9,7 +9,7 @@
  * React Native / Capacitor und Node.
  */
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 /**
  * Schema-Version, die ein Transport (QR, JSON) für diesen Bogen fordern muss.
@@ -22,10 +22,12 @@ export const SCHEMA_VERSION = 11;
  * Eine abweichende Sitzplatzzahl an einem Fahrzeug erst ab Schema 9.
  * Eine abweichende Dienststelle je Person erst ab Schema 10.
  * Eine Uhrzeit zum Zeitraum (von/bis) erst ab Schema 11.
+ * Ein Funkrufname als Erreichbarkeit einer Person (KontaktArt.FUNK) erst ab Schema 12.
  */
 export function transportSchemaVersion(
   b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge" | "einsatz">>,
 ): number {
+  if (b.personal.some((p) => p.kontakte.some((k) => k.art === KontaktArt.FUNK))) return 12;
   if (b.einsatz?.zeitraumVonIso != null || b.einsatz?.zeitraumBisIso != null) return 11;
   if (b.personal.some((p) => p.dienststelle)) return 10;
   if (b.fahrzeuge?.some((f) => f.sitzplaetze != null)) return 9;
@@ -201,14 +203,23 @@ export enum KontaktArt {
   MOBIL = 0,
   FESTNETZ = 1,
   EMAIL = 2,
+  /**
+   * Funkrufname der Person (Handfunkgerät, Führungskraft): Freitext wie
+   * "Heros Oldenburg 18/13-1" oder eine OPTA. Ab Schema 12 — ein Bogen mit
+   * dieser Kontaktart fordert Schema 12 (transportSchemaVersion), ältere
+   * Leser lehnen ihn ab, statt den Wert als Rufnummer zu lesen.
+   */
+  FUNK = 3,
 }
 
 export interface Kontakt {
   art: KontaktArt;
-  dienstlich: boolean; // D = dienstlich / P = privat
+  /** D = dienstlich / P = privat. Bei FUNK stets true (ein Funkrufname ist nie privat). */
+  dienstlich: boolean;
   /**
    * MOBIL/FESTNETZ: nur Ziffern, z. B. "01712345678" (QR: BCD-gepackt).
    * EMAIL: Freitext ODER weglassbar, wenn (alt) emailTemplate gesetzt ist.
+   * FUNK: Freitext, der Funkrufname wie er gesprochen wird.
    */
   wert?: string;
   /**

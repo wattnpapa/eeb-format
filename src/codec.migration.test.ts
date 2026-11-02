@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 // auskommen, damit derselbe Test unter jsdom laufen kann (ADR-003, Regel 2).
 import { deflateRaw, inflateRaw } from "pako";
 import { decodePayloadUrl, type Kompressor } from "./codec.js";
-import { Ernaehrung, Fahrerlaubnis, SCHEMA_VERSION } from "./model.js";
+import { Ernaehrung, Fahrerlaubnis, KontaktArt, SCHEMA_VERSION } from "./model.js";
 
 const kompressor: Kompressor = {
   deflateRaw: (d) => deflateRaw(d, { level: 9 }),
@@ -180,6 +180,42 @@ describe("Abwärtskompatibilität: v10-QR-Code ohne Uhrzeit zum Zeitraum", () =>
   it("liest die Felder hinter dem Einsatz weiter richtig", () => {
     expect(bogen.personal.map((p) => p.nachname)).toEqual(["Müller", "Schulz"]);
     expect(bogen.personal[0]!.dienststelle).toBe("OV Delmenhorst");
+    expect(bogen.fahrzeuge[0]!.sitzplaetze).toBe(7);
+  });
+});
+
+/**
+ * EINGEFRORENE v11-Fixture (der Testvektor „voll-schema-11“, erzeugt mit dem
+ * Schema-11-Encoder vor der Einführung des Funkrufnamens als Erreichbarkeit in
+ * Schema 12). Sie belegt, dass v11-Bögen mit Rufnummern und E-Mail weiter
+ * gelesen werden und dort keine Kontaktart „Funk“ auftaucht.
+ *
+ * Inhalt (v11): THW OV Oldenburg, Deichverteidigung Elsfleth 27.–29.10.2026
+ * 08:00–18:00 +01:00, 2 Personen mit Mobil/E-Mail bzw. Festnetz, 3 Fahrzeuge.
+ */
+const V11_QR_URL =
+  "https://erfassungsbogen.app/#B.LMAD3ABXB3OVP-2T634QVQW7I*N443U96OE2V$R2AMX$D9UZ4B6:91QJ12JA0J8J*7MIE:IVZFYC0ON6SVFPZ05Q40NEK$PNR1JVU$OO5ZWOH4YVSKJ-Z3ESENJCT33$DS4F3*AN581:80:FE*FDYSV47E*YP:834IWSNKF4XO0NRVOGZOIH5791CAC8XFGHDI8CCPW-OD5JXHIY4I63FZBO$A25:R-*3JK8IAKJ70UN4YPZ8F-BYUVUYW4A*CUNEUX$H*/SD5R1WWFVACQH0INUGW::LKX9DP5UTLUD8AYYG*52$S/HTCGTPIEHXOU*WO3XIR1N/BNUNNOR/S*Y31PUU/IU:RLEZ--IJELN10PX2*RD$3EZMOZHNAXA4-R8450WW29N6V3J$B1KF-$AA/NU5$H34NB76/$O7Q871JP:Q92$PZ80W2VA$--SQ5MYEJV1KKH88*Y70Y/MP3:43DD*ETDWGMLSOB4P3KSL-*KHDR0UYIVYGABAVAMU0A1P6EQAV$YNQWP4DQM5N5M5X64WZ72DAHE0KN3$CXCM1BANJUUL-";
+
+describe("Abwärtskompatibilität: v11-QR-Code ohne Funkrufname als Erreichbarkeit", () => {
+  const bogen = decodePayloadUrl(V11_QR_URL, kompressor);
+
+  it("wird auf die aktuelle Schema-Version gehoben", () => {
+    expect(bogen.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("liest die Kontakte wie bisher: Rufnummern BCD, E-Mail als String, kein Funk", () => {
+    expect(bogen.personal[0]!.kontakte).toEqual([
+      { art: KontaktArt.MOBIL, dienstlich: true, wert: "01701234567" },
+      { art: KontaktArt.EMAIL, dienstlich: false, wert: "anna.mueller@example.org" },
+    ]);
+    expect(bogen.personal[1]!.kontakte).toEqual([{ art: KontaktArt.FESTNETZ, dienstlich: false, wert: "04419876" }]);
+    expect(bogen.personal.every((p) => p.kontakte.every((k) => k.art !== KontaktArt.FUNK))).toBe(true);
+  });
+
+  it("liest die Felder um die Kontakte herum weiter richtig", () => {
+    expect(bogen.einsatz.zeitraumVonIso).toBe("2026-10-27T08:00:00+01:00");
+    expect(bogen.personal[0]!.dienststelle).toBe("OV Delmenhorst");
+    expect(bogen.personal[0]!.zusatzqualifikationen).toHaveLength(3);
     expect(bogen.fahrzeuge[0]!.sitzplaetze).toBe(7);
   });
 });

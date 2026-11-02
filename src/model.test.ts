@@ -192,7 +192,7 @@ describe("ansprechpartner()", () => {
 
 describe("Konstanten", () => {
   it("SCHEMA_VERSION ist die aktuelle Version 11", () => {
-    expect(SCHEMA_VERSION).toBe(11);
+    expect(SCHEMA_VERSION).toBe(12);
     // Sanity: der Meldekopf-Modus ist als eigener Enum-Wert vorhanden.
     expect(PersonalErfassung.NUR_STAERKE).toBe(1);
   });
@@ -231,6 +231,11 @@ describe("Konstanten", () => {
     expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({}) })).toBe(5);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({ zeitraumVonIso: "2020-01-02T08:00:00+01:00" }) })).toBe(11);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [], einsatz: ez({ zeitraumBisIso: "2020-01-02T00:00:00Z" }) })).toBe(11);
+    // Ein Funkrufname als Erreichbarkeit fordert Schema 12; Rufnummer und E-Mail nicht.
+    const mit = (art: KontaktArt) => ({ ...person(), kontakte: [{ art, dienstlich: true, wert: "x" }] });
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.MOBIL), mit(KontaktArt.EMAIL)] })).toBe(5);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.FUNK)] })).toBe(12);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.FUNK)], einsatz: ez({ zeitraumVonIso: "2020-01-02T08:00:00+01:00" }) })).toBe(12);
   });
 
   it("zeitraumIso / zeitraumIsoLesen: ISO 8601 mit Offset hin und zurück", () => {

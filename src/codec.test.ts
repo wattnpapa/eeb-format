@@ -263,6 +263,25 @@ describe("BCD-Telefonnummern", () => {
   });
 });
 
+describe("Funkrufname als Erreichbarkeit (Schema 12)", () => {
+  it("fordert Schema 12, reist als Freitext und übersteht den Roundtrip", () => {
+    const b = basisBogen();
+    b.personal[0]!.kontakte = [
+      { art: KontaktArt.MOBIL, dienstlich: true, wert: "01701234501" },
+      { art: KontaktArt.FUNK, dienstlich: true, wert: "Heros Oldenburg 18/13-1" },
+    ];
+    expect(encodeBinaer(b)[0]).toBe(12);
+    const zurueck = decodeBinaer(encodeBinaer(b));
+    gleich(zurueck, b);
+    expect(zurueck.personal[0]!.kontakte[1]).toEqual({ art: KontaktArt.FUNK, dienstlich: true, wert: "Heros Oldenburg 18/13-1" });
+  });
+
+  it("ohne Funkrufname bleibt der Bogen bei der kleineren Version", () => {
+    const b = basisBogen();
+    expect(encodeBinaer(b)[0]).toBeLessThan(12);
+  });
+});
+
 describe("Vokabular-Werte", () => {
   it("kodiert Code und Freitext unterscheidbar", () => {
     const b = basisBogen();

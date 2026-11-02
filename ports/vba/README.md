@@ -15,11 +15,13 @@ werden im VBA-Editor über *Datei → Datei importieren* eingebunden.
 
 ## Was der Dekoder kann und was nicht
 
-- Liest Schema 2 bis 11; Felder jüngerer Versionen bleiben bei älteren Codes
+- Liest Schema 2 bis 12; Felder jüngerer Versionen bleiben bei älteren Codes
   leer/0 (Stand minutengenau ab 7, weitere Fahrerlaubnisklassen ab 8,
   Sitzplätze ab 9, abweichende Dienststelle je Person ab 10, Zeitraum mit
   Uhrzeit ab 11: `zeitraumVonIso`/`zeitraumBisIso` als ISO 8601 mit Offset,
-  leer = nur der Tag; die Wandzeit steckt dann auch in `zeitraumVon`/`zeitraumBis`).
+  leer = nur der Tag; die Wandzeit steckt dann auch in `zeitraumVon`/`zeitraumBis`;
+  Funkrufname als Erreichbarkeit einer Person ab 12: Kontaktart 3, Freitext,
+  erscheint in `TEebPerson.kontakte` als `Funk: Heros Oldenburg 22/51-1` ohne (D)/(P)).
 - Berufe stehen im Format als Freitext mit Präfix `Beruf: ` in den
   Zusatzqualifikationen; der Dekoder trennt sie nach `TEebPerson.berufe`.
 - Mehrteilige Codes: `EebIstSegmentCode` vor `EebBogenLesen` prüfen, Teile mit
@@ -36,19 +38,23 @@ werden im VBA-Editor über *Datei → Datei importieren* eingebunden.
 
 Es gibt kein Headless-VBA, deshalb von Hand: aus
 `../testvektoren/testvektoren.json` die `url` jedes Vektors (und bei
-`voll-schema-11` die drei `segmente.urls` in beliebiger Reihenfolge) in das
+`voll-schema-12` die drei `segmente.urls` in beliebiger Reihenfolge) in das
 Eingabefeld der Mappe geben bzw. `EebBogenAlsText(url)` im Direktfenster
 aufrufen und mit `erwartet` vergleichen. Mindestens prüfen:
 
 - kein Fehler „nicht unterstützte Schema-Version",
-- `voll-schema-11`: `zeitraumVonIso = "2026-10-27T08:00:00+01:00"`,
+- `voll-schema-12`: `personal(1).kontakte` endet auf `Funk: Heros Oldenburg 22/51-1`
+  (ohne (D)/(P)), davor `Mobil: 01701234567 (D), E-Mail: anna.mueller@example.org (P)`,
+  `zeitraumVonIso = "2026-10-27T08:00:00+01:00"`,
   `zeitraumBisIso = "2026-10-29T18:00:00+01:00"`, Zeitraum
   „27.10.2026 08:00 - 29.10.2026 18:00“, `personal(1).dienststelle = "OV Delmenhorst"`,
   `personal(1).berufe = "Elektroniker/in, Krankenpfleger/in"`,
   `personal(1).fahrerlaubnis = "B+CE+A"`, `fahrzeuge(1).sitzplaetze = 7`,
   `fahrzeuge(2).typ = "Mannschaftstransportwagen Ortsverband"`,
+- `alt-schema-11`: `personal(1).kontakte = "Mobil: 01701234567 (D), E-Mail: anna.mueller@example.org (P)"`,
+  kein `Funk:`-Eintrag,
 - `alt-schema-10`: `zeitraumVonIso` und `zeitraumBisIso` leer, Zeitraum ohne Uhrzeit,
-- `alt-schema-2/8/9/10`: Personen, Funktionen und Fahrzeuge wie in `erwartet`.
+- `alt-schema-2/8/9/10/11`: Personen, Funktionen und Fahrzeuge wie in `erwartet`.
 
 Nach jeder Formatänderung ist dieser Ordner im selben Commit nachzuziehen
 (siehe `../../CLAUDE.md`); die CI hält `SCHEMA_MAX` gegen `SCHEMA_VERSION`.
