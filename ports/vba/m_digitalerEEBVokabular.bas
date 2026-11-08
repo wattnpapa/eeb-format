@@ -4,7 +4,7 @@ Attribute VB_Name = "m_digitalerEEBVokabular"
 '
 '  GENERIERT - nicht von Hand aendern. Quelle: erfassungsbogen.app,
 '  npm run vokabular:excel-vba (scripts/excel-vokabular-vba.mts).
-'  355 Einträge, Stand des Vokabulars: bos-vokabulare 2f94a46.
+'  363 Einträge, Stand des Vokabulars: bos-vokabulare 5caec20.
 '
 '  Die Codes im QR-Code sind append-only: eine ältere Tabelle liest neuere
 '  Bögen weiter, unbekannte Codes erscheinen als "#123". Zum Nachziehen das
@@ -28,14 +28,14 @@ End Function
 
 Private Sub VokabularAufbauen()
     Set mVokab = New Collection
-    ' Einheitstypen (THW) (46)
+    ' Einheitstypen (THW) (49)
     EinheitstypenFuellen1
     ' Funktionen und Zusatzqualifikationen (THW) (228)
     FunktionenFuellen1
     FunktionenFuellen2
     FunktionenFuellen3
     FunktionenFuellen4
-    ' Fahrzeugtypen (THW) (51)
+    ' Fahrzeugtypen (THW) (56)
     FahrzeugeFuellen1
     ' Funkruf-Kennwörter (alle Organisationen) (7)
     KennwoerterFuellen1
@@ -100,6 +100,9 @@ Private Sub EinheitstypenFuellen1()
     v "E44", "Fachgruppe Kommunikation (B)"
     v "E45", "Stabspersonal"
     v "E46", "Ortsverband (Stab)"
+    v "E47", "Trupp Logistik-Materialerhaltung"
+    v "E48", "Trupp Logistik-Verbrauchsgüterversorgung"
+    v "E49", "Trupp Logistik-Tanklogistik"
 End Sub
 
 ' --- Funktionen und Zusatzqualifikationen (THW)
@@ -375,8 +378,8 @@ Private Sub FahrzeugeFuellen1()
     v "V26", "Mehrzweckgerätewagen"
     v "V27", "Mannschaftstransportwagen Ortsverband"
     v "V28", "Lastkraftwagen Kipper mit Ladekran"
-    v "V29", "Auflieger Plane/Spriegel"
-    v "V30", "Auflieger Plattform"
+    v "V29", "Auflieger Pritsche Plane/Spriegel mit Ladebordwand"
+    v "V30", "Auflieger Container"
     v "V40", "Anhänger (2 t Nutzlast)"
     v "V41", "Anhänger mit Spezialaufbau für FGr K (1 t Nutzlast)"
     v "V42", "Anhänger Führung und Lage"
@@ -393,11 +396,16 @@ Private Sub FahrzeugeFuellen1()
     v "V53", "Anhänger TWAA"
     v "V54", "Anhänger BDF-Lafette"
     v "V55", "Anhänger mit Abstützsystem Holz"
-    v "V56", "Kühlanhänger"
+    v "V56", "Anhänger mit Spezialaufbau für FGr Log-V, Kühl"
+    v "V57", "Anhänger 12 t, Koffer (Trockenlager)"
+    v "V58", "Anhänger Tandem (5 t Zuladung)"
+    v "V59", "Anhänger mit Spezialaufbau für FGr Log-MW (2 t Nutzlast)"
     v "V60", "Abrollbehälter"
     v "V61", "Wechselbrücke"
     v "V62", "Container 10 ft"
     v "V63", "Container 20 ft"
+    v "V64", "Abrollbehälter Kraftstoff (ca. 9 m³)"
+    v "V65", "Werkstattcontainer"
 End Sub
 
 ' --- Funkruf-Kennwörter (alle Organisationen)
