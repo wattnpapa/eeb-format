@@ -335,6 +335,21 @@ export interface Einheit {
   /** Vokabular der Organisation: THW "FGr K (A)"; FW "Löschzug"; DRK "SEG Sanität"; … */
   einheitsTyp: VokabularWert;
   /**
+   * Der Bogen meldet keine Einheit, sondern EINE einzeln anrückende Person mit
+   * Sonderaufgabe (Fachberater/in, Baufachberater/in, Technische/r Berater/in,
+   * BÖ …). `personal` enthält dann genau diese Person; ihre erste Funktion ist
+   * die Bezeichnung und bestimmt das taktische Zeichen (Raute statt Formation).
+   * `einheitsTyp` trägt denselben Namen als Freitext.
+   *
+   * Bewusst OHNE eigene Schema-Version (anders als das Übungs-Flag): Im QR ist
+   * es Bit 2 im Kopf der Einheit, das ältere Leser nie auswerten. Sie zeigen
+   * den Bogen als Einheit mit Stärke 0/0/1//1 und dem Funktionsnamen als Typ —
+   * so, wie Einzelpersonen bisher gemeldet wurden. Das ist ungenauer, aber
+   * nicht falsch; ein Ablehnen am älteren Meldekopf wäre der größere Schaden.
+   * Nicht gesetzt (undefined) = Einheit.
+   */
+  einzelperson?: boolean;
+  /**
    * Referenz in ein mitgeliefertes Standort-Verzeichnis (THW: offizielle
    * OV-Nummer). Wenn gesetzt, ist die hierarchie inkl. Kontakten daraus
    * ableitbar und entfällt im QR komplett (~150 Bytes Ersparnis).
@@ -426,6 +441,11 @@ export interface Erfassungsbogen {
 }
 
 // ---------- Abgeleitete Werte (werden NICHT gespeichert/kodiert) ----------
+
+/** Meldet der Bogen eine einzeln anrückende Person statt einer Einheit? (siehe Einheit.einzelperson) */
+export function istEinzelperson(b: { einheit: Pick<Einheit, "einzelperson"> }): boolean {
+  return b.einheit.einzelperson === true;
+}
 
 /** Stärkemeldung "0 / 3 / 17 / 20" — manuell erfasst oder aus dem Personal abgeleitet. */
 export function staerke(b: Pick<Erfassungsbogen, "personal" | "staerkeManuell">): Staerke {

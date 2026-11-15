@@ -24,6 +24,10 @@ werden im VBA-Editor über *Datei → Datei importieren* eingebunden.
   erscheint in `TEebPerson.kontakte` als `Funk: Heros Oldenburg 22/51-1` ohne (D)/(P);
   abweichende Grundfarbe des taktischen Zeichens je Fahrzeug ab 13:
   `TEebFahrzeug.zeichenfarbe` ist `kommunal`, `grau` oder leer).
+- Einzelpersonen (Fachberater/in, Baufachberater/in …) melden sich mit einem
+  eigenen Bogen: `TEebBogen.einzelperson` ist dann `True`, `personal(1)` ist die
+  Person, `einheitsTyp` trägt ihre Funktion. Das Kennzeichen ist Bit 2 im Kopf
+  der Einheit und hat keine eigene Schema-Version.
 - Berufe stehen im Format als Freitext mit Präfix `Beruf: ` in den
   Zusatzqualifikationen; der Dekoder trennt sie nach `TEebPerson.berufe`.
 - Mehrteilige Codes: `EebIstSegmentCode` vor `EebBogenLesen` prüfen, Teile mit

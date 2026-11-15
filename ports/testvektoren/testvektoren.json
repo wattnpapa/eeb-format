@@ -110,6 +110,64 @@
       }
     },
     {
+      "name": "einzelperson",
+      "hinweis": "Einzeln anrückende Person statt Einheit (einheit.einzelperson, Bit 2 im Kopf der Einheit, ohne eigene Schema-Version): genau eine Person, ihre erste Funktion ist die Bezeichnung, kein Fahrzeug.",
+      "schemaImStrom": 7,
+      "binaerHex": "07371937000104001142617566616368626572617465722f696e0001000108536965676275726700cb09cc091b426575727465696c756e6720476562c3a47564657363686164656e0001034b696d08426569737069656c2501013d01040b01715550100f00000000",
+      "payloadHex": "45454232633797346760646110744a2c4d4b4cce484a2d4a2c492dd2cfcc63606460e408ce4c4d4f2a2d4a6738cd798653da29b5b4a8243533a7342f5dc13d35e9f092d294d4e2e48cc494d43c064666efcc5c0ea7d4cce282ccd41c5546465b46166ec6c2d000017e06200000",
+      "url": "https://erfassungsbogen.app/#B.LMAD3AK4F41NJUFVBFUK25CBPVBNSBF0BW$6LU64:6JQVK5FUBFXTY4HVTVBEH6NDBRQ8WKINVCHE60LR3L5LZ7Y-7GBE7D9SPZUEMBRMSMY-HLBRMW59NTABL$W0E*MPB8VS*JGCWI:CCTAPRARZGGRT100$7JXZ400",
+      "urlBase64": "https://erfassungsbogen.app/#RUVCMmM3lzRnYGRhEHRKLE1LTM5ISi1KLEkt0s_MY2BkYOQIzkxNTyotSmc4zXmGU9optbSoJDUzpzQvXcE9NenwktKU1OLkjMSU1DwGRmbvzFwOp9TM4oLM1BxVRkZbRhZuxsLQAAF-BiAAAA",
+      "erwartet": {
+        "schemaVersion": 13,
+        "stand": 3610935,
+        "einheit": {
+          "organisation": 1,
+          "einheitsTyp": {
+            "freitext": "Baufachberater/in"
+          },
+          "hierarchie": [
+            {
+              "bezeichnung": {
+                "code": 1
+              },
+              "name": "Siegburg"
+            }
+          ],
+          "einzelperson": true
+        },
+        "einsatz": {
+          "zeitraumVon": 2507,
+          "zeitraumBis": 2508,
+          "ortAuftrag": "Beurteilung Gebäudeschaden"
+        },
+        "personalErfassung": 0,
+        "personal": [
+          {
+            "vorname": "Kim",
+            "nachname": "Beispiel",
+            "fahrerlaubnis": 5,
+            "geschlecht": 2,
+            "staerkeRolle": 0,
+            "ernaehrung": 1,
+            "funktionen": [
+              {
+                "code": 61
+              }
+            ],
+            "kontakte": [
+              {
+                "art": 0,
+                "dienstlich": true,
+                "wert": "01715550100"
+              }
+            ],
+            "zusatzqualifikationen": []
+          }
+        ],
+        "fahrzeuge": []
+      }
+    },
+    {
       "name": "voll-schema-13",
       "hinweis": "Jedes Feld bis Schema 13 belegt: abweichende Zeichenfarbe an zwei Fahrzeugen (Flag 64, 1 = kommunal, 2 = grau; einmal zusammen mit Sitzplätzen), Funkrufname als Erreichbarkeit einer Person (Kontaktart 3, Freitext), Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen der Fahrzeuge, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie.",
       "schemaImStrom": 13,

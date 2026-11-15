@@ -104,6 +104,10 @@ Public Type TEebBogen
     organisation As Long
     organisationName As String
     einheitsTyp As String
+    einzelperson As Boolean       ' True = der Bogen meldet EINE einzeln anrückende
+                                   ' Person (Fachberater/in ...) statt einer Einheit;
+                                   ' personal(1) ist diese Person. Bit 2 im Kopf der
+                                   ' Einheit, ohne eigene Schema-Version.
     einheitOrt As String          ' unterste Hierarchie-Ebene
     hierarchie As String
     standortRef As Long           ' THW-OV-Nummer, 0 = keine
@@ -208,7 +212,7 @@ Private Function BogenAlsTextFormatieren(ByRef b As TEebBogen) As String
     Dim s As String, i As Long
     s = "Stand: " & Format$(b.stand, "dd.mm.yyyy hh:nn") & vbLf
     If b.uebung Then s = s & "*** ÜBUNG ***" & vbLf
-    s = s & "Einheit: " & EebOrgName(b.organisation, b.organisationName) & " " & _
+    s = s & IIf(b.einzelperson, "Einzelperson: ", "Einheit: ") & EebOrgName(b.organisation, b.organisationName) & " " & _
         b.einheitsTyp & " " & b.einheitOrt & vbLf
     s = s & "Auftrag: " & b.ortAuftrag & vbLf
     s = s & "Zeitraum: " & Format$(b.zeitraumVon, IIf(Len(b.zeitraumVonIso) > 0, "dd.mm.yyyy hh:nn", "dd.mm.yyyy")) & " - " & _
@@ -1073,6 +1077,9 @@ Private Sub EinheitLesen(ByRef b As TEebBogen)
     If (flags And 1) <> 0 Then orgName = LiesString()
     b.einheitsTyp = LiesVokabular("E", b.organisation)
     b.organisationName = orgName
+    ' Einzelperson statt Einheit: Bit 2, in jedem Schema lesbar (ältere
+    ' Encoder schreiben es nie).
+    b.einzelperson = (flags And 4) <> 0
 
     If (flags And 2) <> 0 Then
         ' THW: Hierarchie steckt als OV-Nummer im Verzeichnis der App und ist

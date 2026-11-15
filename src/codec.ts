@@ -226,7 +226,9 @@ function encodeFahrzeug(w: Writer, f: Fahrzeug): void {
 
 function encodeEinheit(w: Writer, e: Einheit): void {
   w.u8(e.organisation);
-  w.u8((e.organisationName ? 1 : 0) | (e.standortRef != null ? 2 : 0));
+  // Bit 2: Einzelperson. Ohne Schema-Anhebung — ältere Leser werten das Bit
+  // nicht aus und zeigen den Bogen als Einheit (siehe Einheit.einzelperson).
+  w.u8((e.organisationName ? 1 : 0) | (e.standortRef != null ? 2 : 0) | (e.einzelperson ? 4 : 0));
   if (e.organisationName) w.str(e.organisationName);
   w.vokab(e.einheitsTyp);
   if (e.standortRef != null) {
@@ -412,6 +414,7 @@ function decodeEinheit(r: Reader): Einheit {
   const einheitsTyp = r.vokab();
   const e: Einheit = { organisation, einheitsTyp, hierarchie: [] };
   if (organisationName != null) e.organisationName = organisationName;
+  if (flags & 4) e.einzelperson = true;
   if (flags & 2) {
     // Auflösung der Hierarchie über das Standort-Verzeichnis ist Aufgabe der
     // App (Verzeichnis nicht Teil des Codecs).

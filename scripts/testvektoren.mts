@@ -52,6 +52,34 @@ const minimal = {
   fahrzeuge: [],
 };
 
+/** Einzelperson: ein Baufachberater ohne Fahrzeug (Mitfahrt), Kennzeichen im Kopf der Einheit. */
+const einzelperson = {
+  schemaVersion: SCHEMA_VERSION,
+  stand: minute("2026-11-12", 14, 15),
+  einheit: {
+    organisation: 1,
+    einheitsTyp: { freitext: "Baufachberater/in" },
+    einzelperson: true,
+    hierarchie: [{ bezeichnung: { code: 1 }, name: "Siegburg" }],
+  },
+  einsatz: { zeitraumVon: tag("2026-11-12"), zeitraumBis: tag("2026-11-13"), ortAuftrag: "Beurteilung Gebäudeschaden" },
+  personalErfassung: 0,
+  personal: [
+    {
+      nachname: "Beispiel",
+      vorname: "Kim",
+      staerkeRolle: 0,
+      funktionen: [{ code: 61 }],
+      fahrerlaubnis: 5,
+      geschlecht: 2,
+      ernaehrung: 1,
+      kontakte: [{ art: 0, dienstlich: true, wert: "01715550100" }],
+      zusatzqualifikationen: [],
+    },
+  ],
+  fahrzeuge: [],
+};
+
 /** Voller Bogen: nutzt jedes Feld bis einschließlich Schema 12. */
 const voll = {
   schemaVersion: SCHEMA_VERSION,
@@ -202,6 +230,7 @@ function erzeugen(): string {
   const vektoren = [
     vektorAusBogen("minimal", minimal, 0, "Nur Pflichtfelder, manuelle Stärke, Feuerwehr mit Freitext-Einheitstyp."),
     vektorAusBogen("schema-5", schema5, 0, "Inhalt fordert nur Schema 5 — der heutige Encoder schreibt dann auch Schema 5 (transportSchemaVersion)."),
+    vektorAusBogen("einzelperson", einzelperson, 0, "Einzeln anrückende Person statt Einheit (einheit.einzelperson, Bit 2 im Kopf der Einheit, ohne eigene Schema-Version): genau eine Person, ihre erste Funktion ist die Bezeichnung, kein Fahrzeug."),
     vektorAusBogen("voll-schema-13", voll, 3, "Jedes Feld bis Schema 13 belegt: abweichende Zeichenfarbe an zwei Fahrzeugen (Flag 64, 1 = kommunal, 2 = grau; einmal zusammen mit Sitzplätzen), Funkrufname als Erreichbarkeit einer Person (Kontaktart 3, Freitext), Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen der Fahrzeuge, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
     ...ALTCODES.map((a) => {
       const erwartet = codec.decodePayloadUrl(a.url, nodeKompressor);
