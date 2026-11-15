@@ -24,6 +24,7 @@ import {
   StaerkeRolle,
   SCHEMA_VERSION,
   datumAusIso,
+  transportSchemaVersion,
   zeitpunktAusIso,
   type Erfassungsbogen,
 } from "./model.js";
@@ -124,6 +125,17 @@ describe("Binär-Roundtrip (encodeBinaer/decodeBinaer)", () => {
     expect(decodeBinaer(encodeBinaer(echt)).uebung).toBeUndefined();
     // Das Flag sitzt in einem freien Bit des Personal-Flags-Bytes.
     expect(encodeBinaer(uebung).length).toBe(encodeBinaer(echt).length);
+  });
+
+  it("erhält das Kennzeichen Einzelperson — ohne den Strom zu verlängern und ohne höhere Schema-Version", () => {
+    const einheit = basisBogen();
+    const person = { ...basisBogen(), einheit: { ...basisBogen().einheit, einzelperson: true } };
+    expect(decodeBinaer(encodeBinaer(person)).einheit.einzelperson).toBe(true);
+    expect(decodeBinaer(encodeBinaer(einheit)).einheit.einzelperson).toBeUndefined();
+    // Bit 2 im Kopf der Einheit; ältere Leser werten es nicht aus und lesen
+    // den Rest unverändert — deshalb fordert es bewusst keine neue Version.
+    expect(encodeBinaer(person).length).toBe(encodeBinaer(einheit).length);
+    expect(transportSchemaVersion(person)).toBe(transportSchemaVersion(einheit));
   });
 
   it("schreibt die kleinste tragende Schema-Version (5/6/7)", () => {
