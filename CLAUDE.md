@@ -45,6 +45,38 @@ trotzdem im selben Commit erledigen. Geht es wirklich nicht, die Portierung
 Hinweis im Kopf des Quelltexts, und der Wächter bleibt rot, bis es erledigt
 ist. Lieber ein roter Prüfschritt als ein Leser, der ab Schema N falsch liest.
 
+## Regel: Schemaänderung = alle drei Apps im selben Arbeitsschritt nachziehen
+
+Dieses Format lesen drei Apps, die den Kern als gepinnten Stand einbinden:
+
+- **Erfassungsbogen** (<https://github.com/wattnpapa/erfassungsbogen>)
+- **Meldekopf-App** (<https://github.com/wattnpapa/meldekopf>)
+- **S1-Control** (<https://github.com/wattnpapa/S1-Control>)
+
+Bleibt eine davon hinter dem Schema zurück, lehnt sie neue Bögen ab oder zeigt
+sie falsch an, und zwar am Meldekopf, also dort, wo der Bogen gebraucht wird.
+
+Deshalb gilt bei **jeder Anpassung des Schemas** (`SCHEMA_VERSION`, neues oder
+entfallenes Feld, Flag-Bit, Enumeration, neue Freitext-Konvention; auch ohne
+höhere Schema-Version wie bei `einheit.einzelperson`):
+
+- Die Änderung ist erst fertig, wenn **Erfassungsbogen, Meldekopf und
+  S1-Control** den neuen Stand dieses Repos übernommen haben und weiter
+  funktionieren: Submodul- bzw. Paketstand heben, dort Typprüfung, Tests und
+  Verhaltensszenarien laufen lassen, und alles anpassen, was das neue Feld
+  lesen, anzeigen, exportieren oder weiterreichen muss.
+- Das geschieht im selben Arbeitsschritt, nicht als Folgeaufgabe. Reihenfolge:
+  dieses Repo und die übrigen Kern-Repos (`bos-meldekopf`, `bos-eeb-satz`,
+  `bos-taktische-zeichen`, `bos-vokabulare`), dann Erfassungsbogen, dann
+  Meldekopf und S1-Control.
+- Fehlt der Zugriff auf eines der Repos, das **vor** der Schemaänderung sagen
+  und den Zugriff anfordern. Geht es trotzdem nicht, am Ende ausdrücklich
+  melden, welche App noch auf dem alten Stand ist. Nie stillschweigend nur das
+  Format ändern.
+- Alte Bögen bleiben in allen drei Apps lesbar (Aufnahmeregel 4, ab Schema 2).
+
+Dieselbe Regel steht in der `CLAUDE.md` des Erfassungsbogens.
+
 ## Neue Portierung aufnehmen
 
 - Ordner `ports/<sprache>/` mit `README.md`, `PORT.json` (Felder wie in
