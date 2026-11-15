@@ -15,13 +15,15 @@ werden im VBA-Editor über *Datei → Datei importieren* eingebunden.
 
 ## Was der Dekoder kann und was nicht
 
-- Liest Schema 2 bis 12; Felder jüngerer Versionen bleiben bei älteren Codes
+- Liest Schema 2 bis 13; Felder jüngerer Versionen bleiben bei älteren Codes
   leer/0 (Stand minutengenau ab 7, weitere Fahrerlaubnisklassen ab 8,
   Sitzplätze ab 9, abweichende Dienststelle je Person ab 10, Zeitraum mit
   Uhrzeit ab 11: `zeitraumVonIso`/`zeitraumBisIso` als ISO 8601 mit Offset,
   leer = nur der Tag; die Wandzeit steckt dann auch in `zeitraumVon`/`zeitraumBis`;
   Funkrufname als Erreichbarkeit einer Person ab 12: Kontaktart 3, Freitext,
-  erscheint in `TEebPerson.kontakte` als `Funk: Heros Oldenburg 22/51-1` ohne (D)/(P)).
+  erscheint in `TEebPerson.kontakte` als `Funk: Heros Oldenburg 22/51-1` ohne (D)/(P);
+  abweichende Grundfarbe des taktischen Zeichens je Fahrzeug ab 13:
+  `TEebFahrzeug.zeichenfarbe` ist `kommunal`, `grau` oder leer).
 - Berufe stehen im Format als Freitext mit Präfix `Beruf: ` in den
   Zusatzqualifikationen; der Dekoder trennt sie nach `TEebPerson.berufe`.
 - Mehrteilige Codes: `EebIstSegmentCode` vor `EebBogenLesen` prüfen, Teile mit
@@ -38,12 +40,12 @@ werden im VBA-Editor über *Datei → Datei importieren* eingebunden.
 
 Es gibt kein Headless-VBA, deshalb von Hand: aus
 `../testvektoren/testvektoren.json` die `url` jedes Vektors (und bei
-`voll-schema-12` die drei `segmente.urls` in beliebiger Reihenfolge) in das
+`voll-schema-13` die drei `segmente.urls` in beliebiger Reihenfolge) in das
 Eingabefeld der Mappe geben bzw. `EebBogenAlsText(url)` im Direktfenster
 aufrufen und mit `erwartet` vergleichen. Mindestens prüfen:
 
 - kein Fehler „nicht unterstützte Schema-Version",
-- `voll-schema-12`: `personal(1).kontakte` endet auf `Funk: Heros Oldenburg 22/51-1`
+- `voll-schema-13`: `personal(1).kontakte` endet auf `Funk: Heros Oldenburg 22/51-1`
   (ohne (D)/(P)), davor `Mobil: 01701234567 (D), E-Mail: anna.mueller@example.org (P)`,
   `zeitraumVonIso = "2026-10-27T08:00:00+01:00"`,
   `zeitraumBisIso = "2026-10-29T18:00:00+01:00"`, Zeitraum
@@ -51,10 +53,13 @@ aufrufen und mit `erwartet` vergleichen. Mindestens prüfen:
   `personal(1).berufe = "Elektroniker/in, Krankenpfleger/in"`,
   `personal(1).fahrerlaubnis = "B+CE+A"`, `fahrzeuge(1).sitzplaetze = 7`,
   `fahrzeuge(2).typ = "Mannschaftstransportwagen Ortsverband"`,
+  `fahrzeuge(1).zeichenfarbe` leer, `fahrzeuge(4).zeichenfarbe = "kommunal"`,
+  `fahrzeuge(5).zeichenfarbe = "grau"` bei `fahrzeuge(5).sitzplaetze = 0`,
+- `alt-schema-12`: drei Fahrzeuge, alle mit leerer `zeichenfarbe`,
 - `alt-schema-11`: `personal(1).kontakte = "Mobil: 01701234567 (D), E-Mail: anna.mueller@example.org (P)"`,
   kein `Funk:`-Eintrag,
 - `alt-schema-10`: `zeitraumVonIso` und `zeitraumBisIso` leer, Zeitraum ohne Uhrzeit,
-- `alt-schema-2/8/9/10/11`: Personen, Funktionen und Fahrzeuge wie in `erwartet`.
+- `alt-schema-2/8/9/10/11/12`: Personen, Funktionen und Fahrzeuge wie in `erwartet`.
 
 Nach jeder Formatänderung ist dieser Ordner im selben Commit nachzuziehen
 (siehe `../../CLAUDE.md`); die CI hält `SCHEMA_MAX` gegen `SCHEMA_VERSION`.

@@ -11,9 +11,9 @@ Attribute VB_Name = "m_digitalerEEBParsing"
 '     Bytes         ->  Magic "EEB2" bzw. "EEB2C" (Signaturkette wird
 '                       übersprungen, NICHT geprüft)
 '     Rest          ->  Deflate (raw, RFC 1951) entpacken
-'     Binärstrom    ->  Felder des Bogens (Schema 2..12)
+'     Binärstrom    ->  Felder des Bogens (Schema 2..13)
 '
-'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 12 werden gelesen,
+'  Abwärtskompatibilität: alle Schema-Versionen 2 bis 13 werden gelesen,
 '  Felder jüngerer Versionen bleiben bei älteren Codes leer/0 (wie
 '  decodeBinaer in vendor/eeb-format/src/codec.ts). Neu je Version:
 '     3  Ernährung je Person        7  Stand minutengenau
@@ -21,6 +21,7 @@ Attribute VB_Name = "m_digitalerEEBParsing"
 '     9  Sitzplätze je Fahrzeug    10  abweichende Dienststelle je Person
 '    11  Zeitraum von/bis mit Uhrzeit und Zeitzonen-Offset (ISO 8601)
 '    12  Funkrufname als Erreichbarkeit einer Person (Kontaktart 3)
+'    13  abweichende Grundfarbe des taktischen Zeichens je Fahrzeug
 '
 '  Einstiegspunkte für EINEN vollständigen Code:
 '     EebBogenLesen         (Text -> TEebBogen, wirft bei Fehlern)
@@ -58,7 +59,7 @@ Option Explicit
 
 Private Const B41_ALPHABET As String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$*-/:"
 Private Const EEB_EPOCHE As Date = #1/1/2020#
-Private Const SCHEMA_MAX As Long = 12
+Private Const SCHEMA_MAX As Long = 13
 ' Obergrenze der Signaturstufen im Container (wie MAX_STUFEN in der App).
 Private Const MAX_STUFEN As Long = 32
 ' Ein Beruf steht als Freitext mit diesem Präfix in den Zusatzqualifikationen
@@ -91,6 +92,9 @@ Public Type TEebFahrzeug
     aenderungen As String
     sitzplaetze As Long           ' inkl. Fahrer/in; 0 = nicht angegeben (Richtwert
                                    ' des Fahrzeugtyps gilt) - ab Schema 9
+    zeichenfarbe As String        ' abweichende Grundfarbe des taktischen Zeichens:
+                                   ' "kommunal" (orange), "grau"; leer = Farbe der
+                                   ' Organisation - ab Schema 13
 End Type
 
 Public Type TEebBogen
@@ -1222,7 +1226,17 @@ Private Function FahrzeugLesen(ByVal organisation As Long, ByVal einheitOrt As S
     If (flags And 1) <> 0 Then f.stanKonform = IIf((flags And 2) <> 0, "ja", "nein")
     If (flags And 8) <> 0 Then f.aenderungen = LiesString()
     If (flags And 32) <> 0 Then f.sitzplaetze = LiesU8()   ' abweichende Sitzplatzzahl, ab Schema 9
+    If (flags And 64) <> 0 Then f.zeichenfarbe = ZeichenfarbeText(LiesU8())   ' ab Schema 13
     FahrzeugLesen = f
+End Function
+
+' Zeichenfarbe (model.ts): 1 = kommunal (orange), 2 = grau; unbekannte Werte als #n.
+Private Function ZeichenfarbeText(ByVal wert As Long) As String
+    Select Case wert
+        Case 1: ZeichenfarbeText = "kommunal"
+        Case 2: ZeichenfarbeText = "grau"
+        Case Else: ZeichenfarbeText = "#" & wert
+    End Select
 End Function
 
 Private Function FunkrufLesen(ByVal organisation As Long, ByVal einheitOrt As String) As String

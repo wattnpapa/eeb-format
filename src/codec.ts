@@ -210,7 +210,8 @@ function encodeFahrzeug(w: Writer, f: Fahrzeug): void {
     (f.stanKonform ? 2 : 0) |
     (f.funkrufname ? 4 : 0) |
     (f.aenderungen ? 8 : 0) |
-    (f.sitzplaetze != null ? 32 : 0);
+    (f.sitzplaetze != null ? 32 : 0) |
+    (f.zeichenfarbe != null ? 64 : 0);
   w.u8(flags);
   w.vokab(f.typ);
   w.str(f.kennzeichen ?? "");
@@ -219,6 +220,8 @@ function encodeFahrzeug(w: Writer, f: Fahrzeug): void {
   // Ein Byte reicht: mehr als 255 Sitzplätze hat kein Fahrzeug, und die
   // Eingabe der App begrenzt ohnehin auf zweistellige Zahlen.
   if (f.sitzplaetze != null) w.u8(f.sitzplaetze);
+  // Ab Schema 13: abweichende Grundfarbe des taktischen Zeichens (Zeichenfarbe).
+  if (f.zeichenfarbe != null) w.u8(f.zeichenfarbe);
 }
 
 function encodeEinheit(w: Writer, e: Einheit): void {
@@ -398,6 +401,7 @@ function decodeFahrzeug(r: Reader): Fahrzeug {
   if (flags & 1) f.stanKonform = (flags & 2) !== 0;
   if (flags & 8) f.aenderungen = r.str();
   if (flags & 32) f.sitzplaetze = r.u8();
+  if (flags & 64) f.zeichenfarbe = r.u8();
   return f;
 }
 

@@ -219,3 +219,37 @@ describe("Abwärtskompatibilität: v11-QR-Code ohne Funkrufname als Erreichbarke
     expect(bogen.fahrzeuge[0]!.sitzplaetze).toBe(7);
   });
 });
+
+/**
+ * EINGEFRORENE v12-Fixture (der Testvektor „voll-schema-12“, erzeugt mit dem
+ * Schema-12-Encoder vor der Einführung der Zeichenfarbe am Fahrzeug in
+ * Schema 13, Flag 64 im Fahrzeug-Byte). Sie belegt, dass das neue Flag nichts
+ * verschoben hat und v12-Fahrzeuge ohne Zeichenfarbe gelesen werden.
+ *
+ * Inhalt (v12): THW OV Oldenburg, Deichverteidigung Elsfleth, 2 Personen
+ * (eine mit Funkrufname als Erreichbarkeit), 3 Fahrzeuge.
+ */
+const V12_QR_URL =
+  "https://erfassungsbogen.app/#B.LMAD3AUVB8:U17WK63O4FDQ05E1-A5M-$77NW7LADB5VOV:C6PROR5/*KGD3Y/B2$Z98MRZW5E*KZPP-QA77XS$OF-WD6XY6K71QLP:WCM:WZ4N-X81AJ9D2TU9$-99*T6H8VNN7AQL$VS9ZR8-:ZE-YF*:RT4MM1V1E4IT$6F1VA6Q/I9WQJ/5YYF9CRML*I9ZIYW:/YT3QESKO-15H22WTGC0LW29YTXTZSI25/4USAM1QG3I6FH41-GD1QXOKRY979S0NKFNAN6K8KQOHJGNW/TV0MV*AO33/$6XXG9Y0H2LI/HS:3:70GFI6:$UZEXUE3/I-IKG-CP-GV7XE7IDO*2YS5STUL7-0OSDMR62PLV92XU9S8L1HX-ZSQ1HCM$CGB2Q:17O4CSX53CD5$C6UI$4J7A4LLTJE-G0D2YMQ*:NZ1GBY4WSU85:WLKYSGR76$EVQVEJ$IAYPS**I2SFPTM*GHZ3N9IX53AOJ75MI-*PJ5-2TYUJQ-M$DKAB:-DAW920303BX10IXNIGWB5*5K266W2EF-Y6CKAFM5:KE5EAFE9HP3D3X8S*S8*-WFXYX18T2";
+
+describe("Abwärtskompatibilität: v12-QR-Code ohne Zeichenfarbe am Fahrzeug", () => {
+  const bogen = decodePayloadUrl(V12_QR_URL, kompressor);
+
+  it("wird auf die aktuelle Schema-Version gehoben", () => {
+    expect(bogen.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("liest alle Fahrzeuge unverschoben — ohne Zeichenfarbe", () => {
+    expect(bogen.fahrzeuge).toHaveLength(3);
+    expect(bogen.fahrzeuge[0]!.kennzeichen).toBe("THW-81234");
+    expect(bogen.fahrzeuge[0]!.sitzplaetze).toBe(7);
+    expect(bogen.fahrzeuge[1]!.funkrufname?.ort).toBe("Delmenhorst");
+    expect(bogen.fahrzeuge[2]!.typ).toEqual({ freitext: "Privat-Pkw" });
+    expect(bogen.fahrzeuge.every((f) => f.zeichenfarbe === undefined)).toBe(true);
+  });
+
+  it("liest die Felder hinter den Fahrzeugen weiter richtig", () => {
+    expect(bogen.sofortbedarf?.dieselLiter).toBe(120);
+    expect(bogen.sonstiges).toBe("Testbogen Schema 12 für die Portierungen");
+  });
+});

@@ -8,6 +8,7 @@ import {
   PersonalErfassung,
   StaerkeRolle,
   SCHEMA_VERSION,
+  Zeichenfarbe,
   alleFahrerlaubnisse,
   ansprechpartner,
   datumAusIso,
@@ -191,8 +192,8 @@ describe("ansprechpartner()", () => {
 });
 
 describe("Konstanten", () => {
-  it("SCHEMA_VERSION ist die aktuelle Version 11", () => {
-    expect(SCHEMA_VERSION).toBe(12);
+  it("SCHEMA_VERSION ist die aktuelle Version 13", () => {
+    expect(SCHEMA_VERSION).toBe(13);
     // Sanity: der Meldekopf-Modus ist als eigener Enum-Wert vorhanden.
     expect(PersonalErfassung.NUR_STAERKE).toBe(1);
   });
@@ -236,6 +237,10 @@ describe("Konstanten", () => {
     expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.MOBIL), mit(KontaktArt.EMAIL)] })).toBe(5);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.FUNK)] })).toBe(12);
     expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.FUNK)], einsatz: ez({ zeitraumVonIso: "2020-01-02T08:00:00+01:00" }) })).toBe(12);
+    // Eine abweichende Zeichenfarbe fordert Schema 13; Fahrzeuge ohne sie nicht.
+    const farbig = { typ: { freitext: "Anh" }, zeichenfarbe: Zeichenfarbe.KOMMUNAL };
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [], fahrzeuge: [fz(7), farbig] })).toBe(13);
+    expect(transportSchemaVersion({ stand: mitternacht, personal: [mit(KontaktArt.FUNK)], fahrzeuge: [fz()] })).toBe(12);
   });
 
   it("zeitraumIso / zeitraumIsoLesen: ISO 8601 mit Offset hin und zurück", () => {

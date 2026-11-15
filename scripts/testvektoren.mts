@@ -102,9 +102,11 @@ const voll = {
     },
     { typ: { code: 27 }, kennzeichen: "THW-81299", stanKonform: false, funkrufname: { kennwort: { code: 1 }, eigenerStandort: false, ort: "Delmenhorst", teile: [86, 25] } },
     { typ: { freitext: "Privat-Pkw" } },
+    { typ: { freitext: "Anh Ölwehr" }, kennzeichen: "WHV-HK 12", zeichenfarbe: 1 },
+    { typ: { freitext: "AB Havarie" }, sitzplaetze: 0, zeichenfarbe: 2 },
   ],
   sofortbedarf: { verpflegungPersonen: 2, dieselLiter: 120, benzinLiter: 0, gemischLiter: 5, unterbringung: true, ruhezeitErforderlich: true },
-  sonstiges: "Testbogen Schema 12 für die Portierungen",
+  sonstiges: "Testbogen Schema 13 für die Portierungen",
 };
 
 /** Schema 5: nichts, was eine höhere Version fordert — so schreibt der Encoder noch heute Altcodes. */
@@ -154,6 +156,12 @@ const ALTCODES: Array<{ name: string; schema: number; url: string; hinweis: stri
     hinweis: "Zeitraum mit Uhrzeit, Kontakte nur Mobil/Festnetz/E-Mail — noch ohne Funkrufname als Erreichbarkeit (Kontaktart 3 ab Schema 12). Ehemals Vektor voll-schema-11.",
     url: "https://erfassungsbogen.app/#B.LMAD3ABXB3OVP-2T634QVQW7I*N443U96OE2V$R2AMX$D9UZ4B6:91QJ12JA0J8J*7MIE:IVZFYC0ON6SVFPZ05Q40NEK$PNR1JVU$OO5ZWOH4YVSKJ-Z3ESENJCT33$DS4F3*AN581:80:FE*FDYSV47E*YP:834IWSNKF4XO0NRVOGZOIH5791CAC8XFGHDI8CCPW-OD5JXHIY4I63FZBO$A25:R-*3JK8IAKJ70UN4YPZ8F-BYUVUYW4A*CUNEUX$H*/SD5R1WWFVACQH0INUGW::LKX9DP5UTLUD8AYYG*52$S/HTCGTPIEHXOU*WO3XIR1N/BNUNNOR/S*Y31PUU/IU:RLEZ--IJELN10PX2*RD$3EZMOZHNAXA4-R8450WW29N6V3J$B1KF-$AA/NU5$H34NB76/$O7Q871JP:Q92$PZ80W2VA$--SQ5MYEJV1KKH88*Y70Y/MP3:43DD*ETDWGMLSOB4P3KSL-*KHDR0UYIVYGABAVAMU0A1P6EQAV$YNQWP4DQM5N5M5X64WZ72DAHE0KN3$CXCM1BANJUUL-",
   },
+  {
+    name: "alt-schema-12",
+    schema: 12,
+    hinweis: "Drei Fahrzeuge noch ohne Zeichenfarbe (Flag 64 im Fahrzeug-Byte ab Schema 13). Ehemals Vektor voll-schema-12.",
+    url: "https://erfassungsbogen.app/#B.LMAD3AUVB8:U17WK63O4FDQ05E1-A5M-$77NW7LADB5VOV:C6PROR5/*KGD3Y/B2$Z98MRZW5E*KZPP-QA77XS$OF-WD6XY6K71QLP:WCM:WZ4N-X81AJ9D2TU9$-99*T6H8VNN7AQL$VS9ZR8-:ZE-YF*:RT4MM1V1E4IT$6F1VA6Q/I9WQJ/5YYF9CRML*I9ZIYW:/YT3QESKO-15H22WTGC0LW29YTXTZSI25/4USAM1QG3I6FH41-GD1QXOKRY979S0NKFNAN6K8KQOHJGNW/TV0MV*AO33/$6XXG9Y0H2LI/HS:3:70GFI6:$UZEXUE3/I-IKG-CP-GV7XE7IDO*2YS5STUL7-0OSDMR62PLV92XU9S8L1HX-ZSQ1HCM$CGB2Q:17O4CSX53CD5$C6UI$4J7A4LLTJE-G0D2YMQ*:NZ1GBY4WSU85:WLKYSGR76$EVQVEJ$IAYPS**I2SFPTM*GHZ3N9IX53AOJ75MI-*PJ5-2TYUJQ-M$DKAB:-DAW920303BX10IXNIGWB5*5K266W2EF-Y6CKAFM5:KE5EAFE9HP3D3X8S*S8*-WFXYX18T2",
+  },
 ];
 
 // ------------------------------------------------------------- Erzeugung
@@ -194,7 +202,7 @@ function erzeugen(): string {
   const vektoren = [
     vektorAusBogen("minimal", minimal, 0, "Nur Pflichtfelder, manuelle Stärke, Feuerwehr mit Freitext-Einheitstyp."),
     vektorAusBogen("schema-5", schema5, 0, "Inhalt fordert nur Schema 5 — der heutige Encoder schreibt dann auch Schema 5 (transportSchemaVersion)."),
-    vektorAusBogen("voll-schema-12", voll, 3, "Jedes Feld bis Schema 12 belegt: Funkrufname als Erreichbarkeit einer Person (Kontaktart 3, Freitext), Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen der Fahrzeuge, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
+    vektorAusBogen("voll-schema-13", voll, 3, "Jedes Feld bis Schema 13 belegt: abweichende Zeichenfarbe an zwei Fahrzeugen (Flag 64, 1 = kommunal, 2 = grau; einmal zusammen mit Sitzplätzen), Funkrufname als Erreichbarkeit einer Person (Kontaktart 3, Freitext), Zeitraum mit Uhrzeit und Offset (ISO 8601, 08:00–18:00 +01:00), Dienststelle, Berufe-Präfix, weitere Fahrerlaubnisse, Sitzplätze, Funkrufnamen der Fahrzeuge, Sofortbedarf. Zusätzlich als dreiteilige EEBS.-Serie."),
     ...ALTCODES.map((a) => {
       const erwartet = codec.decodePayloadUrl(a.url, nodeKompressor);
       const payload: Uint8Array = codec.datenDekodieren(codec.fragmentInhalt(a.url));

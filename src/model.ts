@@ -9,7 +9,7 @@
  * React Native / Capacitor und Node.
  */
 
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 /**
  * Schema-Version, die ein Transport (QR, JSON) für diesen Bogen fordern muss.
@@ -23,10 +23,12 @@ export const SCHEMA_VERSION = 12;
  * Eine abweichende Dienststelle je Person erst ab Schema 10.
  * Eine Uhrzeit zum Zeitraum (von/bis) erst ab Schema 11.
  * Ein Funkrufname als Erreichbarkeit einer Person (KontaktArt.FUNK) erst ab Schema 12.
+ * Eine abweichende Grundfarbe des taktischen Zeichens an einem Fahrzeug erst ab Schema 13.
  */
 export function transportSchemaVersion(
   b: Pick<Erfassungsbogen, "uebung" | "stand" | "personal"> & Partial<Pick<Erfassungsbogen, "fahrzeuge" | "einsatz">>,
 ): number {
+  if (b.fahrzeuge?.some((f) => f.zeichenfarbe != null)) return 13;
   if (b.personal.some((p) => p.kontakte.some((k) => k.art === KontaktArt.FUNK))) return 12;
   if (b.einsatz?.zeitraumVonIso != null || b.einsatz?.zeitraumBisIso != null) return 11;
   if (b.personal.some((p) => p.dienststelle)) return 10;
@@ -277,6 +279,19 @@ export interface Funkrufname {
   teile: number[]; // Kennzahl(en), z. B. [18, 13]
 }
 
+/**
+ * Abweichende Grundfarbe des taktischen Zeichens eines Fahrzeugs — für Gerät,
+ * das die Einheit führt, das ihr aber nicht gehört: der Anhänger der Gemeinde,
+ * der Abrollbehälter des Havariekommandos. 0 bleibt frei („nicht gesetzt" ist
+ * das fehlende Feld, nicht ein Wert).
+ */
+export enum Zeichenfarbe {
+  /** Kommunalorange, wie die Kommunalfahrzeuge der Zeichensammlung. */
+  KOMMUNAL = 1,
+  /** Grau — übrige Träger: Behörden, Firmen, Leihgerät. */
+  GRAU = 2,
+}
+
 export interface Fahrzeug {
   /** Vokabular der Organisation: THW FmKW/MzKW/…; FW LF/DLK/ELW/…; RD RTW/KTW/NEF/… */
   typ: VokabularWert;
@@ -293,6 +308,13 @@ export interface Fahrzeug {
    * Ein Bogen, der das Feld nutzt, fordert Schema 9 (transportSchemaVersion).
    */
   sitzplaetze?: number;
+  /**
+   * Grundfarbe des taktischen Zeichens, wenn sie von der Farbe der
+   * Organisation abweicht (Gerät von Partnern). Fehlt = Farbe der
+   * Organisation (der Normalfall). Ein Bogen, der das Feld nutzt, fordert
+   * Schema 13 (transportSchemaVersion).
+   */
+  zeichenfarbe?: Zeichenfarbe;
 }
 
 /** Eine Ebene der Organisationshierarchie (THW: OV/RB/LV; FW: Gemeinde/Landkreis; DRK: KV/LV …). */

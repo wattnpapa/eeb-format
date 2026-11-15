@@ -23,6 +23,7 @@ import {
   PersonalErfassung,
   StaerkeRolle,
   SCHEMA_VERSION,
+  Zeichenfarbe,
   datumAusIso,
   zeitpunktAusIso,
   type Erfassungsbogen,
@@ -290,6 +291,19 @@ describe("Vokabular-Werte", () => {
     const zurueck = decodeBinaer(encodeBinaer(b));
     expect(zurueck.einheit.einheitsTyp).toEqual({ freitext: "Sondereinheit XY" });
     expect(zurueck.fahrzeuge[0]!.typ).toEqual({ code: 2 });
+  });
+
+  it("hält eine abweichende Zeichenfarbe je Fahrzeug", () => {
+    const b = basisBogen();
+    b.fahrzeuge[0]!.zeichenfarbe = Zeichenfarbe.KOMMUNAL;
+    b.fahrzeuge[1]!.zeichenfarbe = Zeichenfarbe.GRAU;
+    b.fahrzeuge[1]!.sitzplaetze = 3;
+    const zurueck = decodeBinaer(encodeBinaer(b));
+    expect(zurueck.fahrzeuge[0]!.zeichenfarbe).toBe(Zeichenfarbe.KOMMUNAL);
+    expect(zurueck.fahrzeuge[1]!.zeichenfarbe).toBe(Zeichenfarbe.GRAU);
+    expect(zurueck.fahrzeuge[1]!.sitzplaetze).toBe(3);
+    // Ohne das Feld bleibt es undefined.
+    expect(decodeBinaer(encodeBinaer(basisBogen())).fahrzeuge[0]!.zeichenfarbe).toBeUndefined();
   });
 
   it("hält eine abweichende Sitzplatzzahl je Fahrzeug", () => {
