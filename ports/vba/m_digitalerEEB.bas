@@ -18,7 +18,7 @@ Private Const ERREICHBARKEIT As String = "L"
 Private Const VERFUEGBAR_BIS As String = "M"
 Private Const ABLOESUNG_DATUM As String = "N"
 Private Const ANFORDERUNGS_ID As String = "O"
-Private Const ZUGESAGT_FUER As String = "P"
+Private Const VERFUEGBAR_AB As String = "P"
 Private Const ZUGESAGT_VON As String = "Q"
 Private Const VORGESEHENE_EINHEIT As String = "R"
 Private Const VORGESEHENER_AUFTRAG As String = "S"
@@ -109,8 +109,7 @@ Private Sub verarbeiteScan(ByVal scanText As String)
         End Select
  
     Else
-        ' Einzelner, vollständiger Code: eine evtl. noch offene Teile-Sammlung
-        ' ist damit hinfällig und soll den nächsten Scan nicht als "fremd" stören.
+        ' Einzelner, vollständiger Code: alte Sammlung ist damit hinfällig.
         mBereiterBogen = EebBogenLesen(scanText)
         Call m_digitalerEEBParsing.EebSammlungVerwerfen
         mBogenBereit = True
@@ -144,8 +143,7 @@ Public Sub verarbeiteOkClick()
 
     Call m_digitalerEEB.eebBogenInZeileSchreiben(zeile.Row, mBereiterBogen)
     t_staerke.Range(FUEST & zeile.Row).Select
-    ' Sammlung der Teile freigeben, damit der nächste mehrteilige Bogen nicht
-    ' als "andere Serie" gemeldet wird.
+    ' Sammlung kann jetzt verworfen werden, um Konflikte mit weiteren Scans zu vermeiden.
     Call m_digitalerEEBParsing.EebSammlungVerwerfen
     mBogenBereit = False
 
@@ -253,18 +251,6 @@ Private Sub eebBogenInZeileSchreiben(ByVal zielzeile As Long, b As TEebBogen)
         If p.geschlecht = 2 Then diversZahl = diversZahl + 1
     Next i
 
-    ' --- Abweichende Dienststellen (ab Schema 10): "Name (Dienststelle)" ---
-    Dim fremdeText As String
-    fremdeText = ""
-    For i = 1 To b.personalAnzahl
-        p = b.personal(i)
-        If Len(p.dienststelle) > 0 Then
-            If Len(fremdeText) > 0 Then fremdeText = fremdeText & ", "
-            fremdeText = fremdeText & Trim$(p.vorname & " " & p.nachname) & " (" & p.dienststelle & ")"
-        End If
-    Next i
-    If Len(fremdeText) > 0 Then fremdeText = "Abweichende Dienststelle: " & fremdeText
-
     ' --- Fahrzeuge: Typen+Kennzeichen in einen Text kombinieren ---
     fahrzeugText = ""
     For i = 1 To b.fahrzeugAnzahl
@@ -285,20 +271,19 @@ Private Sub eebBogenInZeileSchreiben(ByVal zielzeile As Long, b As TEebBogen)
         .Cells(zielzeile, GRUPPE).Value = ""
         .Cells(zielzeile, PERSON).Value = ""
         .Cells(zielzeile, GERAETE_FAHRZEUGE).Value = fahrzeugText
-        .Cells(zielzeile, AUFTRAEGE).Value = b.ortAuftrag
+        .Cells(zielzeile, AUFTRAEGE).Value = ""
         .Cells(zielzeile, ERREICHBARKEIT).Value = erreichbarkeitDesFuehrers(b)
-        .Cells(zielzeile, VERFUEGBAR_BIS).Value = IIf(b.zeitraumBis <> 0, Format$(b.zeitraumBis, "dd.mm.yyyy hh:nn"), "")
+        .Cells(zielzeile, VERFUEGBAR_BIS).Value = IIf(b.zeitraumBis <> 0, Format$(b.zeitraumBis, "dd/mm/yyyy hh:nn"), "")
         .Cells(zielzeile, ABLOESUNG_DATUM).Value = ""
         .Cells(zielzeile, ANFORDERUNGS_ID).Value = ""
-        .Cells(zielzeile, ZUGESAGT_FUER).Value = IIf(b.zeitraumVon <> 0, Format$(b.zeitraumVon, "dd.mm.yyyy hh:nn"), "")
+        .Cells(zielzeile, VERFUEGBAR_AB).Value = IIf(b.zeitraumVon <> 0, Format$(b.zeitraumVon, "dd/mm/yyyy hh:nn"), "")
         .Cells(zielzeile, ZUGESAGT_VON).Value = ""
         .Cells(zielzeile, VORGESEHENE_EINHEIT).Value = ""
         .Cells(zielzeile, VORGESEHENER_AUFTRAG).Value = b.ortAuftrag
-        .Cells(zielzeile, EINGETR_ZUGEW).Value = IIf(b.einsatzbeginn <> 0, Format$(b.einsatzbeginn, "dd.mm.yyyy hh:nn"), "")
-        .Cells(zielzeile, einsatzende).Value = IIf(b.einsatzende <> 0, Format$(b.einsatzende, "dd.mm.yyyy hh:nn"), "")
+        .Cells(zielzeile, EINGETR_ZUGEW).Value = ""
+        .Cells(zielzeile, einsatzende).Value = ""
         .Cells(zielzeile, RUECKFUEHRUNG).Value = ""
-        .Cells(zielzeile, BEMERKUNGEN).Value = b.sonstiges & _
-            IIf(Len(fremdeText) > 0, IIf(Len(b.sonstiges) > 0, "; ", "") & fremdeText, "")
+        .Cells(zielzeile, BEMERKUNGEN).Value = b.sonstiges
 
         .Cells(zielzeile, status).Value = ""
         .Cells(zielzeile, SCHICHT).Value = ""
